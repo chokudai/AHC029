@@ -671,7 +671,7 @@ public partial class Solver
         //プロジェクト評価
         for (int i = 0; i < F.M; i++)
         {
-            double needValue = 1.0 - 0.2 * (S.ps[i].HP - S.damage[i]) / S.ps[i].V;
+            double needValue = 1.0 - 0.05 * (S.ps[i].HP - S.damage[i]) / S.ps[i].V;
             ans += (long)((S.ps[i].V - (S.ps[i].HP - S.damage[i] + (2L << S.L))) * needValue * 100L);
 
             //ans += (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 93 / 100;
@@ -682,7 +682,7 @@ public partial class Solver
         }
         foreach (var i in S.UpdateProjects)
         {
-            double needValue = 1.0 - 0.2 * (S.ps[i].HP - S.damage[i]) / S.ps[i].V;
+            double needValue = 1.0 - 0.05 * (S.ps[i].HP - S.damage[i]) / S.ps[i].V;
             ans -= (long)((S.ps[i].V - (S.ps[i].HP - S.damage[i] + (2L << S.L))) * needValue * 100L);
 
             //ans -= (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 93 / 100;
