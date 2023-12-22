@@ -6,7 +6,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Runtime.ExceptionServices;
 using System.Security.Cryptography.X509Certificates;
 
-class Field
+public class Field
 {
     public int N, M, K, T;
 
@@ -62,7 +62,7 @@ class Field
 
 }
 
-class PreProject
+public class PreProject
 {
     public int V;
     public int HP;
@@ -89,7 +89,7 @@ class PreProject
 }
 
 
-class Project
+public class Project
 {
     public int V;
     public int HP;
@@ -107,7 +107,7 @@ class Project
     }
 }
 
-class Card
+public class Card
 {
     public int type;
     public int work;
@@ -120,7 +120,7 @@ class Card
 }
 
 
-class State
+public class State
 {
     public Field F;
 
@@ -291,10 +291,10 @@ class State
     }
 }
 
-class Solver
+public class Solver
 {
     //上げて実行するときは必ずコミットする！
-    public int SolverVersion = 1;
+    static public int SolverVersion = 3;
 
 
     public static void Main()
@@ -302,14 +302,19 @@ class Solver
         new Solver().run();
     }
 
-    Field F = new Field(0, 0, 0, 0);
-    State S;
+    public Solver()
+    {
+        
+    }
+
+    public Field F = new Field(0, 0, 0, 0);
+    public State S;
     Scanner cin;
 
-    Project[] InitProject;
-    Card[] InitCard;
+    public Project[] InitProject;
+    public Card[] InitCard;
 
-    void run()
+    public void run()
     {
         input();
         init();
@@ -398,8 +403,11 @@ class Solver
                 //Console.Error.WriteLine($"Buy CardType: {CardList[choice.buy].c.type} Power: {CardList[choice.buy].c.work} Cost:{CardList[choice.buy].cost}");
                 //Console.Error.WriteLine($"Use CardType: {S.cs[choice.use.i].type} Power: {S.cs[choice.use.i].work} Target:{choice.use.t}");
 
-                Console.WriteLine($"{choice.buy}");
-                Console.WriteLine($"{choice.use.i} {choice.use.t}");
+                if (!F.TestFlag)
+                {
+                    Console.WriteLine($"{choice.buy}");
+                    Console.WriteLine($"{choice.use.i} {choice.use.t}");
+                }
                 S.Update();
             }
             else
@@ -408,7 +416,10 @@ class Solver
                 S.Simulate(choice.use.i, choice.use.t);
                 //Console.Error.WriteLine($"Use CardType: {S.cs[choice.use.i].type} Power: {S.cs[choice.use.i].work} Target:{choice.use.t}");
 
-                Console.WriteLine($"{choice.use.i} {choice.use.t}");
+                if (!F.TestFlag)
+                {
+                    Console.WriteLine($"{choice.use.i} {choice.use.t}");
+                }
                 S.Update();
             }
 
@@ -418,7 +429,10 @@ class Solver
             }
         }
 
-        Console.WriteLine("0");
+        if (!F.TestFlag)
+        {
+            Console.WriteLine("0");
+        }
 
         Console.Error.WriteLine($"Score = {S.money} Level = {S.L}");
     }
@@ -463,7 +477,6 @@ class Solver
 
         
         if (ls.Count == 0) return (0, (0, 0));
-
 
         if (F.sw.ElapsedMilliseconds >= 1800) return ls[0].play;
 
@@ -512,7 +525,7 @@ class Solver
 
         for (int cn = 0; cn < CheckNum; cn++)
         {
-            (Card c, int cost)[][] pcs = new (Card c, int cost)[CheckTurn][];
+            (Card c, int cost)[][] pcs = MakeCL(new int[] { 21, 11, 11, 6, 4 }, 53, CheckTurn);
             for (int t = 0; t < CheckTurn; t++)
             {
                 pcs[t] = new (Card c, int cost)[F.K];
@@ -644,10 +657,12 @@ class Solver
             if (S.cs[i].type == 0)
             {
                 ans += (long)S.cs[i].work * 89 / 100;
+
+                //if (S.cs[i].work <= (1 << S.L)) ans -= (1 << S.L);
             }
             else if (S.cs[i].type == 1)
             {
-                ans += (long)S.cs[i].work * F.M * 2 / 3 * 89 / 100;
+                ans += (long)S.cs[i].work * F.M * 4 / 5 * 89 / 100;
             }
             else if (S.cs[i].type == 2 || S.cs[i].type == 3)
             {
@@ -657,6 +672,7 @@ class Solver
             {
                 ans += 0;
             }
+
         }
 
         //プロジェクト評価
@@ -683,6 +699,52 @@ class Solver
         }
 
         return ans;
+    }
+
+
+    public (Card c, int cost)[][] MakeCL(int[] GuessX, int Sum, int CheckTurn)
+    {
+        (Card c, int cost)[][] pcs = new (Card c, int cost)[CheckTurn][];
+        for (int t = 0; t < CheckTurn; t++)
+        {
+            pcs[t] = new (Card c, int cost)[F.K];
+            pcs[t][0] = (new Card(0, 1), 0);
+            for (int i = 1; i < F.K; i++)
+            {
+                int T = F.rnd.nextInt(Sum);
+
+                int type;
+                if ((T -= GuessX[0]) < 0) type = 0;
+                else if ((T -= GuessX[1]) < 0) type = 1;
+                else if ((T -= GuessX[2]) < 0) type = 2;
+                else if ((T -= GuessX[3]) < 0) type = 3;
+                else type = 4;
+
+                int p;
+                int omega = F.rnd.nextInt(1, 50);
+
+                if (type == 0)
+                {
+                    p = (int)Math.Min(10000, Math.Max(1, Math.Round(F.rnd.GetGauss(omega, omega / 3.0))));
+                }
+                else if (type == 1)
+                {
+                    p = (int)Math.Min(10000, Math.Max(1, Math.Round(F.rnd.GetGauss(omega, omega / 3.0))));
+                }
+                else if (type == 2 || type == 3)
+                {
+                    p = F.rnd.nextInt(0, 10);
+                    omega = 0;
+                }
+                else
+                {
+                    p = F.rnd.nextInt(200, 1000);
+                    omega = 0;
+                }
+                pcs[t][i] = (new Card(type, omega), p);
+            }
+        }
+        return pcs;
     }
 
 
@@ -721,7 +783,7 @@ class Solver
 
 }
 
-class Scanner
+public class Scanner
 {
     string[] s;
     int i;
@@ -800,7 +862,7 @@ class Scanner
 
 
 
-class XRand
+public class XRand
 {
     uint x, y, z, w;
 
@@ -856,7 +918,8 @@ class XRand
 
     public double GetGauss(double ave, double norm)
     {
-        return ave + normRand() * norm;
+        double ret = ave + normRand() * norm;
+        return ret;
     }
 
     public double normRand()
