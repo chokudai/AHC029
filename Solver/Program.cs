@@ -671,16 +671,22 @@ public partial class Solver
         //プロジェクト評価
         for (int i = 0; i < F.M; i++)
         {
-            ans += (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 93 / 100;
-            ans -= (long)(Math.Pow((S.ps[i].HP - S.damage[i]), 0.9) * 1L);
+            double needValue = 1.0 - 0.2 * (S.ps[i].HP - S.damage[i]) / S.ps[i].V;
+            ans += (long)((S.ps[i].V - (S.ps[i].HP - S.damage[i] + (2L << S.L))) * needValue * 100L);
+
+            //ans += (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 93 / 100;
+            //ans -= (long)(Math.Pow((S.ps[i].HP - S.damage[i]), 0.9) * 1L);
 
             //double needTurn = (double)(S.ps[i].HP - S.damage[i]) / AttackAverage + 1;
             //ans += (long)(AttackAverage / needTurn / 2) * 100L;
         }
         foreach (var i in S.UpdateProjects)
         {
-            ans -= (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 93 / 100;
-            ans += (long)(Math.Pow((S.ps[i].HP - S.damage[i]), 0.9) * 1L);
+            double needValue = 1.0 - 0.2 * (S.ps[i].HP - S.damage[i]) / S.ps[i].V;
+            ans -= (long)((S.ps[i].V - (S.ps[i].HP - S.damage[i] + (2L << S.L))) * needValue * 100L);
+
+            //ans -= (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 93 / 100;
+            //ans += (long)(Math.Pow((S.ps[i].HP - S.damage[i]), 0.9) * 1L);
 
             //double needTurn = (double)(S.ps[i].HP - S.damage[i]) / AttackAverage + 1;
             //ans -= (long)(AttackAverage / needTurn / 2) * 100L;
