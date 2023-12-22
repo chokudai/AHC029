@@ -624,7 +624,7 @@ public partial class Solver
     long Eval(State S)
     {
 
-        if (F.T <= S.Turn - 1) return S.money;
+        if (F.T <= S.Turn + 2) return S.money;
         if (S.L > 20) return -99999999;
 
         int NokoriTurn = F.T - S.Turn;
@@ -638,6 +638,16 @@ public partial class Solver
         ans += AttackAverage * NokoriTurn * 100L / 10;
         ans += (long)S.money * 100L;
 
+        
+        long ans2 = 0;
+        if(S.money > (1L << S.L) * (1000 - F.K * 30))
+        {
+            ans2 = (S.money - (1L << S.L) * (1000 - F.K * 30)) * 100L;
+            ans2 += AttackAverage * 2 * NokoriTurn * 100L / 10;
+            if (ans2 > ans) ans = ans2;
+        }
+        
+
         if(Need > S.money)
         {
             ans -= (Need - S.money) * 1000 * 100L;
@@ -649,13 +659,13 @@ public partial class Solver
             if (S.PreUse == i) continue;
             if (S.cs[i].type == 0)
             {
-                ans += (long)S.cs[i].work * 100L * 89 / 100;
+                ans += (long)S.cs[i].work * 100L * 83 / 100;
 
                 //if (S.cs[i].work <= (1 << S.L)) ans -= (1 << S.L);
             }
             else if (S.cs[i].type == 1)
             {
-                ans += (long)S.cs[i].work * 100L * F.M * 4 / 5 * 89 / 100;
+                ans += (long)S.cs[i].work * 100L * F.M * 4 / 5 * 83 / 100;
             }
             else if (S.cs[i].type == 2 || S.cs[i].type == 3)
             {
@@ -671,8 +681,8 @@ public partial class Solver
         //プロジェクト評価
         for (int i = 0; i < F.M; i++)
         {
-            double needValue = 1.0 - 0.05 * (S.ps[i].HP - S.damage[i]) / S.ps[i].V;
-            ans += (long)((S.ps[i].V - (S.ps[i].HP - S.damage[i] + (2L << S.L))) * needValue * 100L);
+            double needValue = 1.0 - 0.2 * (S.ps[i].HP - S.damage[i]) / S.ps[i].V;
+            ans += (long)((S.ps[i].V - (S.ps[i].HP - S.damage[i] + (Math.Max(1, 8L - F.N) << S.L))) * needValue * 100L);
 
             //ans += (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 93 / 100;
             //ans -= (long)(Math.Pow((S.ps[i].HP - S.damage[i]), 0.9) * 1L);
@@ -682,8 +692,8 @@ public partial class Solver
         }
         foreach (var i in S.UpdateProjects)
         {
-            double needValue = 1.0 - 0.05 * (S.ps[i].HP - S.damage[i]) / S.ps[i].V;
-            ans -= (long)((S.ps[i].V - (S.ps[i].HP - S.damage[i] + (2L << S.L))) * needValue * 100L);
+            double needValue = 1.0 - 0.2 * (S.ps[i].HP - S.damage[i]) / S.ps[i].V;
+            ans -= (long)((S.ps[i].V - (S.ps[i].HP - S.damage[i] + (Math.Max(1, 8L - F.N) << S.L))) * needValue * 100L);
 
             //ans -= (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 93 / 100;
             //ans += (long)(Math.Pow((S.ps[i].HP - S.damage[i]), 0.9) * 1L);
@@ -691,7 +701,7 @@ public partial class Solver
             //double needTurn = (double)(S.ps[i].HP - S.damage[i]) / AttackAverage + 1;
             //ans -= (long)(AttackAverage / needTurn / 2) * 100L;
 
-            //ans += (long)AttackAverage * 100L;
+            ans += (long)AttackAverage * 10L;
         }
 
         return ans;
