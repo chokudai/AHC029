@@ -510,7 +510,13 @@ public partial class Solver
         else
         {
             double perTime = (1600.0 - F.sw.ElapsedMilliseconds) /(F.T - S.Turn);
-            if(perTime >= 2.5)
+            if (perTime >= 3.0)
+            {
+                Target = Math.Min(ls.Count, 8);
+                CheckNum = 100;
+                CheckTurn = Math.Min(5, F.T - S.Turn - 1);
+            }
+            if (perTime >= 2.5)
             {
                 Target = Math.Min(ls.Count, 7);
                 CheckNum = 50;
@@ -643,13 +649,13 @@ public partial class Solver
             if (S.PreUse == i) continue;
             if (S.cs[i].type == 0)
             {
-                ans += (long)S.cs[i].work * 100L * 83 / 100;
+                ans += (long)S.cs[i].work * 100L * 89 / 100;
 
                 //if (S.cs[i].work <= (1 << S.L)) ans -= (1 << S.L);
             }
             else if (S.cs[i].type == 1)
             {
-                ans += (long)S.cs[i].work * 100L * F.M * 4 / 5 * 83 / 100;
+                ans += (long)S.cs[i].work * 100L * F.M * 4 / 5 * 89 / 100;
             }
             else if (S.cs[i].type == 2 || S.cs[i].type == 3)
             {
@@ -665,19 +671,21 @@ public partial class Solver
         //プロジェクト評価
         for (int i = 0; i < F.M; i++)
         {
-            ans += (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 89 / 100;
+            ans += (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 93 / 100;
+            ans -= (long)(Math.Pow((S.ps[i].HP - S.damage[i]), 0.9) * 1L);
 
-            double needTurn = (double)(S.ps[i].HP - S.damage[i]) / AttackAverage + 1;
-            ans += (long)(AttackAverage / needTurn / 2) * 100L;
+            //double needTurn = (double)(S.ps[i].HP - S.damage[i]) / AttackAverage + 1;
+            //ans += (long)(AttackAverage / needTurn / 2) * 100L;
         }
         foreach (var i in S.UpdateProjects)
         {
-            ans -= (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 89 / 100;
+            ans -= (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 93 / 100;
+            ans += (long)(Math.Pow((S.ps[i].HP - S.damage[i]), 0.9) * 1L);
 
-            double needTurn = (double)(S.ps[i].HP - S.damage[i]) / AttackAverage + 1;
-            ans -= (long)(AttackAverage / needTurn / 2) * 100L;
+            //double needTurn = (double)(S.ps[i].HP - S.damage[i]) / AttackAverage + 1;
+            //ans -= (long)(AttackAverage / needTurn / 2) * 100L;
 
-            ans += (long)AttackAverage * 100L;
+            //ans += (long)AttackAverage * 100L;
         }
 
         return ans;
