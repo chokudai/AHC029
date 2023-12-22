@@ -24,6 +24,8 @@ public class Field
     public PreProject [] pps = new PreProject[0];
     public (Card c, int cost)[][] pcs = new (Card c, int cost)[0][];
 
+    public int[] XGuess;
+    public int Xsum;
 
     public Field(int N, int M, int K, int T)
     {
@@ -31,6 +33,15 @@ public class Field
         this.M = M;
         this.K = K;
         this.T = T;
+
+        XGuess = new int[] { 21, 11, 11, 6, 3 };
+        Xsum = XGuess.Sum();
+    }
+
+    public void AddX(int x)
+    {
+        XGuess[x]++;
+        Xsum++;
     }
 
     public void SetPPS()
@@ -291,10 +302,8 @@ public class State
     }
 }
 
-public class Solver
+public partial class Solver
 {
-    //上げて実行するときは必ずコミットする！
-    static public int SolverVersion = 3;
 
 
     public static void Main()
@@ -396,6 +405,11 @@ public class Solver
             if(i != 0)
             {
                 var CardList = GetCardList(S);
+                for (int j = 1; j < CardList.Length; j++)
+                {
+                    F.AddX(CardList[j].c.type);
+                }
+
                 var choice = choose(S, CardList);
                 S.BuyCard(CardList[choice.buy].c, CardList[choice.buy].cost);
                 S.Simulate(choice.use.i, choice.use.t);
@@ -492,8 +506,8 @@ public class Solver
             double perTime = (1600.0 - F.sw.ElapsedMilliseconds) /(F.T - S.Turn);
             if (perTime >= 2.0)
             {
-                Target = Math.Min(ls.Count, 7);
-                CheckNum = 10;
+                Target = Math.Min(ls.Count, 8);
+                CheckNum = 20;
                 CheckTurn = Math.Min(5, F.T - S.Turn - 1);
             }
             else if (perTime >= 1.6)
@@ -525,7 +539,7 @@ public class Solver
 
         for (int cn = 0; cn < CheckNum; cn++)
         {
-            (Card c, int cost)[][] pcs = MakeCL(new int[] { 21, 11, 11, 6, 4 }, 53, CheckTurn);
+            (Card c, int cost)[][] pcs = MakeCL(F.XGuess, F.Xsum, CheckTurn);
             for (int t = 0; t < CheckTurn; t++)
             {
                 pcs[t] = new (Card c, int cost)[F.K];

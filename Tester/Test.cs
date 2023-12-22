@@ -137,7 +137,7 @@ class Tester
         }
         for (int m = M_Min; m <= M_Max; m++)
         {
-            Title.Add($"N = {m}");
+            Title.Add($"M = {m}");
         }
         for (int k = K_Min; k <= K_Max; k++)
         {
