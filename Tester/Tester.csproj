@@ -11,4 +11,8 @@
     <ProjectReference Include="..\Solver\Solver.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="pic\" />
+  </ItemGroup>
+
 </Project>
