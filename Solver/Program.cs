@@ -510,7 +510,13 @@ public partial class Solver
         else
         {
             double perTime = (1600.0 - F.sw.ElapsedMilliseconds) /(F.T - S.Turn);
-            if (perTime >= 2.0)
+            if(perTime >= 2.5)
+            {
+                Target = Math.Min(ls.Count, 7);
+                CheckNum = 50;
+                CheckTurn = Math.Min(5, F.T - S.Turn - 1);
+            }
+            else if (perTime >= 2.0)
             {
                 Target = Math.Min(ls.Count, 7);
                 CheckNum = 20;
@@ -525,13 +531,13 @@ public partial class Solver
             else if(perTime >= 1.3)
             {
                 Target = Math.Min(ls.Count, 3);
-                CheckNum = 5;
+                CheckNum = 10;
                 CheckTurn = Math.Min(5, F.T - S.Turn - 1);
             }
             else
             {
                 Target = Math.Min(ls.Count, 2);
-                CheckNum = 2;
+                CheckNum = 10;
                 CheckTurn = Math.Min(5, F.T - S.Turn - 1);
             }
         }
@@ -663,9 +669,6 @@ public partial class Solver
 
             double needTurn = (double)(S.ps[i].HP - S.damage[i]) / AttackAverage + 1;
             ans += (long)(AttackAverage / needTurn / 2);
-
-            //double needTurn = Math.Max(1, (double)(S.ps[i].HP - S.damage[i]) / AttackAverage);
-            //ans += S.ps[i].V - (long)(needTurn * AttackAverage);
         }
         foreach (var i in S.UpdateProjects)
         {
@@ -675,8 +678,6 @@ public partial class Solver
             ans -= (long)(AttackAverage / needTurn / 2);
 
             ans += (long)AttackAverage;
-            //double needTurn = Math.Max(1, (double)(S.ps[i].HP - S.damage[i]) / AttackAverage);
-            //ans -= S.ps[i].V - (long)(needTurn * AttackAverage);
         }
 
         return ans;
