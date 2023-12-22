@@ -102,10 +102,10 @@ public class PreProject
 
 public class Project
 {
-    public int V;
-    public int HP;
+    public long V;
+    public long HP;
 
-    public Project(int V, int HP)
+    public Project(long V, long HP)
     {
         this.V = V;
         this.HP = HP;
@@ -113,8 +113,8 @@ public class Project
 
     public Project(PreProject pp, int L)
     {
-        this.V = pp.V << L;
-        this.HP = pp.HP << L;
+        this.V = (long)pp.V << L;
+        this.HP = (long)pp.HP << L;
     }
 }
 
@@ -240,11 +240,11 @@ public class State
         damage = new int[F.M];
         for (int i = 0; i < F.M; i++)
         {
-            int h = F.cin.nextInt();
-            int v = F.cin.nextInt();
+            long h = F.cin.nextLong();
+            long v = F.cin.nextLong();
             ps[i] = new Project(v, h);
         }
-        int nextMoney = F.cin.nextInt();
+        long nextMoney = F.cin.nextLong();
         if(money != nextMoney)
         {
             Console.Error.WriteLine($"Error: money != nextMoney. {money} != {nextMoney}");
