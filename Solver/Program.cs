@@ -643,13 +643,13 @@ public partial class Solver
             if (S.PreUse == i) continue;
             if (S.cs[i].type == 0)
             {
-                ans += (long)S.cs[i].work * 100L * 89 / 100;
+                ans += (long)S.cs[i].work * 100L * 93 / 100;
 
                 //if (S.cs[i].work <= (1 << S.L)) ans -= (1 << S.L);
             }
             else if (S.cs[i].type == 1)
             {
-                ans += (long)S.cs[i].work * 100L * F.M * 4 / 5 * 89 / 100;
+                ans += (long)S.cs[i].work * 100L * F.M * 4 / 5 * 93 / 100;
             }
             else if (S.cs[i].type == 2 || S.cs[i].type == 3)
             {
@@ -665,14 +665,14 @@ public partial class Solver
         //プロジェクト評価
         for (int i = 0; i < F.M; i++)
         {
-            ans += (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 93 / 100;
+            ans += (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 97 / 100;
 
             double needTurn = (double)(S.ps[i].HP - S.damage[i]) / AttackAverage + 1;
             ans += (long)(AttackAverage / needTurn / 2) * 100L;
         }
         foreach (var i in S.UpdateProjects)
         {
-            ans -= (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 93 / 100;
+            ans -= (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 97 / 100;
 
             double needTurn = (double)(S.ps[i].HP - S.damage[i]) / AttackAverage + 1;
             ans -= (long)(AttackAverage / needTurn / 2) * 100L;
