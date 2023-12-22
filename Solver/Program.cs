@@ -640,9 +640,12 @@ public partial class Solver
 
         
         long ans2 = 0;
-        if(S.money > (1L << S.L) * (1000 - F.K * 30))
+
+        int dec = F.K * 50 * 53 * F.XGuess[4] / 4 / F.Xsum;
+
+        if(S.money > (1L << S.L) * (1000 - dec))
         {
-            ans2 = (S.money - (1L << S.L) * (1000 - F.K * 30)) * 100L;
+            ans2 = (S.money - (1L << S.L) * (1000 - dec)) * 100L;
             ans2 += AttackAverage * 2 * NokoriTurn * 100L / 10;
             if (ans2 > ans) ans = ans2;
         }
