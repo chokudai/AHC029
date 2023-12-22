@@ -95,7 +95,6 @@ public class PreProject
 
         this.V = v;
         this.HP = h;
-
     }
 }
 
@@ -411,11 +410,18 @@ public partial class Solver
                 }
 
                 var choice = choose(S, CardList);
+                /*
+                Console.Error.WriteLine($"Buy CardType: {CardList[choice.buy].c.type} Power: {CardList[choice.buy].c.work} Cost:{CardList[choice.buy].cost}");
+                Console.Error.WriteLine($"Use CardType: {S.cs[choice.use.i].type} Power: {S.cs[choice.use.i].work} Target:{choice.use.t}");
+                if(S.cs[choice.use.i].type == 0)
+                {
+                    Console.Error.WriteLine($"Target : {S.damage[choice.use.t]}/{S.ps[choice.use.t].HP} -> {S.ps[choice.use.t].V}");
+                }
+                */
+
                 S.BuyCard(CardList[choice.buy].c, CardList[choice.buy].cost);
                 S.Simulate(choice.use.i, choice.use.t);
 
-                //Console.Error.WriteLine($"Buy CardType: {CardList[choice.buy].c.type} Power: {CardList[choice.buy].c.work} Cost:{CardList[choice.buy].cost}");
-                //Console.Error.WriteLine($"Use CardType: {S.cs[choice.use.i].type} Power: {S.cs[choice.use.i].work} Target:{choice.use.t}");
 
                 if (!F.TestFlag)
                 {
@@ -506,20 +512,20 @@ public partial class Solver
             double perTime = (1600.0 - F.sw.ElapsedMilliseconds) /(F.T - S.Turn);
             if (perTime >= 2.0)
             {
-                Target = Math.Min(ls.Count, 8);
+                Target = Math.Min(ls.Count, 7);
                 CheckNum = 20;
                 CheckTurn = Math.Min(5, F.T - S.Turn - 1);
             }
             else if (perTime >= 1.6)
             {
                 Target = Math.Min(ls.Count, 5);
-                CheckNum = 5;
+                CheckNum = 10;
                 CheckTurn = Math.Min(5, F.T - S.Turn - 1);
             }
             else if(perTime >= 1.3)
             {
                 Target = Math.Min(ls.Count, 3);
-                CheckNum = 3;
+                CheckNum = 5;
                 CheckTurn = Math.Min(5, F.T - S.Turn - 1);
             }
             else
@@ -540,45 +546,6 @@ public partial class Solver
         for (int cn = 0; cn < CheckNum; cn++)
         {
             (Card c, int cost)[][] pcs = MakeCL(F.XGuess, F.Xsum, CheckTurn);
-            for (int t = 0; t < CheckTurn; t++)
-            {
-                pcs[t] = new (Card c, int cost)[F.K];
-                pcs[t][0] = (new Card(0, 1), 0);
-                for (int i = 1; i < F.K; i++)
-                {
-                    int T = F.rnd.nextInt(53);
-
-                    int type;
-                    if (T < 21) type = 0;
-                    else if (T < 32) type = 1;
-                    else if (T < 43) type = 2;
-                    else if (T < 49) type = 3;
-                    else type = 4;
-
-                    int p;
-                    int omega = F.rnd.nextInt(1, 50);
-
-                    if (type == 0)
-                    {
-                        p = (int)Math.Min(10000, Math.Max(1, Math.Round(F.rnd.GetGauss(omega, omega / 3.0))));
-                    }
-                    else if (type == 1)
-                    {
-                        p = (int)Math.Min(10000, Math.Max(1, Math.Round(F.rnd.GetGauss(omega, omega / 3.0))));
-                    }
-                    else if (type == 2 || type == 3)
-                    {
-                        p = F.rnd.nextInt(0, 10);
-                        omega = 0;
-                    }
-                    else
-                    {
-                        p = F.rnd.nextInt(200, 1000);
-                        omega = 0;
-                    }
-                    pcs[t][i] = (new Card(type, omega), p);
-                }
-            }
 
             List<PreProject> lpp = new List<PreProject>();
 
@@ -743,7 +710,7 @@ public partial class Solver
                 }
                 else if (type == 1)
                 {
-                    p = (int)Math.Min(10000, Math.Max(1, Math.Round(F.rnd.GetGauss(omega, omega / 3.0))));
+                    p = (int)Math.Min(10000, Math.Max(1, Math.Round(F.rnd.GetGauss(omega * F.M, omega * F.M / 3.0))));
                 }
                 else if (type == 2 || type == 3)
                 {
