@@ -629,12 +629,12 @@ public partial class Solver
         long Need = AttackAverage * 0;
         
         long ans = 0;
-        ans += AttackAverage * NokoriTurn / 10;
-        ans += (long)S.money * 1;
+        ans += AttackAverage * NokoriTurn * 100L / 10;
+        ans += (long)S.money * 100L;
 
         if(Need > S.money)
         {
-            ans -= (Need - S.money) * 1000;
+            ans -= (Need - S.money) * 1000 * 100L;
         }
 
         //カード評価
@@ -643,13 +643,13 @@ public partial class Solver
             if (S.PreUse == i) continue;
             if (S.cs[i].type == 0)
             {
-                ans += (long)S.cs[i].work * 89 / 100;
+                ans += (long)S.cs[i].work * 100L * 89 / 100;
 
                 //if (S.cs[i].work <= (1 << S.L)) ans -= (1 << S.L);
             }
             else if (S.cs[i].type == 1)
             {
-                ans += (long)S.cs[i].work * F.M * 4 / 5 * 89 / 100;
+                ans += (long)S.cs[i].work * 100L * F.M * 4 / 5 * 89 / 100;
             }
             else if (S.cs[i].type == 2 || S.cs[i].type == 3)
             {
@@ -665,19 +665,19 @@ public partial class Solver
         //プロジェクト評価
         for (int i = 0; i < F.M; i++)
         {
-            ans += (S.ps[i].V - (S.ps[i].HP - S.damage[i]) * 93 / 100);
+            ans += (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 93 / 100;
 
             double needTurn = (double)(S.ps[i].HP - S.damage[i]) / AttackAverage + 1;
-            ans += (long)(AttackAverage / needTurn / 2);
+            ans += (long)(AttackAverage / needTurn / 2) * 100L;
         }
         foreach (var i in S.UpdateProjects)
         {
-            ans -= (S.ps[i].V - (S.ps[i].HP - S.damage[i]) * 93 / 100);
+            ans -= (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 93 / 100;
 
             double needTurn = (double)(S.ps[i].HP - S.damage[i]) / AttackAverage + 1;
-            ans -= (long)(AttackAverage / needTurn / 2);
+            ans -= (long)(AttackAverage / needTurn / 2) * 100L;
 
-            ans += (long)AttackAverage;
+            ans += (long)AttackAverage * 100L;
         }
 
         return ans;
