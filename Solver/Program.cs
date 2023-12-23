@@ -547,25 +547,25 @@ public partial class Solver
             {
                 Target = Math.Min(ls.Count, 50);
                 CheckNum = 300;
-                CheckTurn = Math.Min(10, F.T - S.Turn - 1);
+                CheckTurn = Math.Min(13, F.T - S.Turn - 1);
             }
             else if (perTime >= 1.7)
             {
                 Target = Math.Min(ls.Count, 10);
-                CheckNum = 150;
+                CheckNum = 100;
                 CheckTurn = Math.Min(10, F.T - S.Turn - 1);
             }
             else if (perTime >= 1.5)
             {
                 Target = Math.Min(ls.Count, 8);
-                CheckNum = 80;
-                CheckTurn = Math.Min(5, F.T - S.Turn - 1);
+                CheckNum = 60;
+                CheckTurn = Math.Min(8, F.T - S.Turn - 1);
             }
             else if (perTime >= 1.4)
             {
                 Target = Math.Min(ls.Count, 7);
                 CheckNum = 50;
-                CheckTurn = Math.Min(5, F.T - S.Turn - 1);
+                CheckTurn = Math.Min(6, F.T - S.Turn - 1);
             }
             else if (perTime >= 1.3)
             {
@@ -767,7 +767,8 @@ public partial class Solver
 
         long AttackAverage = 10L << L;
         long ans = 0;
-        ans += AttackAverage * NokoriTurn * 100L / 10;
+        ans += AttackAverage * Math.Min(200, NokoriTurn) * (F.K * F.K * F.N * F.M);
+        //ans += AttackAverage * NokoriTurn * 1000L / 10;
         ans += (long)money * 100L;
 
         /*

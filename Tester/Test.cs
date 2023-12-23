@@ -148,13 +148,16 @@ class Tester
 
         double[][] data = new double[list.Count][];
 
+
         for (int i = 0; i < list.Count; i++)
         {
             var item = list[i];
             Version.Add(item.FileName);
             data[i] = new double[Title.Count - 1];
             int[] countNum = new int[Title.Count - 1];
-            
+
+            long sumScore = 0;
+
             for (int j = 0; j < All; j++)
             {
                 double score = (double)item.Numbers[j] / MaxScore[j];
@@ -162,6 +165,7 @@ class Tester
                 data[i][nowP] += score;
                 countNum[nowP]++;
                 nowP++;
+                sumScore += item.Numbers[j];
 
                 for (int n = 0; n < NMUL; n++)
                 {
@@ -202,6 +206,7 @@ class Tester
                 }
                 data[i][j] *= 100;
             }
+            Console.Error.WriteLine(item.FileName + " " + sumScore);
         }
 
 
