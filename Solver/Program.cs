@@ -541,28 +541,27 @@ public partial class Solver
         }
         else
         {
-            double perTime = (1600.0 - F.sw.ElapsedMilliseconds) / (F.T - S.Turn);
-            /*
+            double perTime = (1600.0 - F.sw.ElapsedMilliseconds) / (F.T - S.Turn + 2);
+            
             if (perTime >= 1.8)
             {
                 Target = Math.Min(ls.Count, 50);
-                CheckNum = 200;
+                CheckNum = 300;
                 CheckTurn = Math.Min(10, F.T - S.Turn - 1);
             }
             else if (perTime >= 1.7)
             {
-                Target = Math.Min(ls.Count, 15);
-                CheckNum = 200;
+                Target = Math.Min(ls.Count, 10);
+                CheckNum = 150;
                 CheckTurn = Math.Min(10, F.T - S.Turn - 1);
             }
-            */
-            if (perTime >= 1.5)
+            else if (perTime >= 1.5)
             {
                 Target = Math.Min(ls.Count, 8);
-                CheckNum = 100;
+                CheckNum = 80;
                 CheckTurn = Math.Min(5, F.T - S.Turn - 1);
             }
-            if (perTime >= 1.4)
+            else if (perTime >= 1.4)
             {
                 Target = Math.Min(ls.Count, 7);
                 CheckNum = 50;
