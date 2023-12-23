@@ -473,6 +473,23 @@ public partial class Solver
         S.PreTarget = -1;
         List<(long Score, State S, (int buy, (int i, int t) use) play)> ls = new List<(long Score, State S, (int buy, (int i, int t) use) play)>();
 
+
+        bool[] same = new bool[S.cs.Length];
+        for (int i = 0; i < S.cs.Length; i++)
+        {
+            if (S.PreUse == i) continue;
+            for (int j = 0; j < i; j++)
+            {
+                if (S.PreUse == j) continue;
+                if (S.cs[i].type == S.cs[j].type && S.cs[i].work == S.cs[j].work)
+                {
+                    same[i] = true;
+                    break;
+                }
+            }
+        }
+
+
         for (int i = 0; i < cs.Length; i++)
         {
             State NS = new State(S);
@@ -484,6 +501,7 @@ public partial class Solver
             }
             for (int j = 0; j < S.cs.Length; j++)
             {
+                if (same[j]) continue;
                 int K = 1;
 
                 if (NS.cs[j].type == 0 || NS.cs[j].type == 2)
@@ -524,6 +542,20 @@ public partial class Solver
         else
         {
             double perTime = (1600.0 - F.sw.ElapsedMilliseconds) / (F.T - S.Turn);
+            /*
+            if (perTime >= 1.8)
+            {
+                Target = Math.Min(ls.Count, 50);
+                CheckNum = 200;
+                CheckTurn = Math.Min(10, F.T - S.Turn - 1);
+            }
+            else if (perTime >= 1.7)
+            {
+                Target = Math.Min(ls.Count, 15);
+                CheckNum = 200;
+                CheckTurn = Math.Min(10, F.T - S.Turn - 1);
+            }
+            */
             if (perTime >= 1.5)
             {
                 Target = Math.Min(ls.Count, 8);
@@ -785,7 +817,7 @@ public partial class Solver
             return V * 100L + (100L << L);
         }
 
-        double needValue = 1.0 - 0.3 * HP / V;
+        double needValue = 1.0 - 0.25 * HP / V;
         long mul = (long)((V - HP - (2L << L) * 1));
         //if(mul <= 0) needValue = 0.2 - 0.2 * HP / V;
 
