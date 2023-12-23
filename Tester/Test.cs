@@ -127,6 +127,17 @@ class Tester
             }
         }
 
+
+        List<long> ScoreBorder = new List<long>();
+        long[] ScoreArray = (long[])MaxScore.Clone();
+        Array.Sort(ScoreArray);
+        for (int i = 0; i < 10; i++)
+        {
+            ScoreBorder.Add(ScoreArray[ScoreArray.Length * i / 10]);
+        }
+        ScoreBorder.Add(ScoreArray[ScoreArray.Length - 1] + 1);
+
+
         List<string> Title = new List<string>();
         List<string> Version = new List<string>();
 
@@ -144,6 +155,11 @@ class Tester
         for (int k = K_Min; k <= K_Max; k++)
         {
             Title.Add($"K = {k}");
+        }
+
+        for (int i = 0; i < ScoreBorder.Count - 1; i++)
+        {
+            Title.Add($"{ScoreBorder[i]} - {ScoreBorder[i + 1] - 1}");
         }
 
         double[][] data = new double[list.Count][];
@@ -196,6 +212,16 @@ class Tester
                     }
                     nowP++;
                 }
+
+                for (int k = 0; k < ScoreBorder.Count - 1; k++)
+                {
+                    if (MaxScore[j] >= ScoreBorder[k] && MaxScore[j] < ScoreBorder[k + 1])
+                    {
+                        data[i][nowP] += score;
+                        countNum[nowP]++;
+                    }
+                    nowP++;
+                }
             }
 
             for (int j = 0; j < Title.Count - 1; j++)
@@ -206,7 +232,8 @@ class Tester
                 }
                 data[i][j] *= 100;
             }
-            Console.Error.WriteLine(item.FileName + " " + sumScore);
+
+            //Console.Error.WriteLine(item.FileName + " " + sumScore);
         }
 
 

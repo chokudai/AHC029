@@ -406,6 +406,7 @@ public partial class Solver
 
     void calc()
     {
+        long MaxScore = 0;
         for (int i = 0; i < F.T; i++)
         {
             if (i != 0)
@@ -454,6 +455,7 @@ public partial class Solver
             {
                 //Console.Error.WriteLine($"Turn: {S.Turn} Money: {S.money} Level: {S.L} Val: {Eval(S)}");
             }
+            MaxScore = Math.Max(MaxScore, S.money);
         }
 
         if (!F.TestFlag)
@@ -461,7 +463,7 @@ public partial class Solver
             Console.WriteLine("0");
         }
 
-        Console.Error.WriteLine($"Score = {S.money} Level = {S.L} N = {F.N} M = {F.M} K = {F.K} GP = {GreedyPlay}");
+        Console.Error.WriteLine($"Score = {S.money} Level = {S.L} N = {F.N} M = {F.M} K = {F.K} GP = {GreedyPlay} Rate = {(double)S.money / MaxScore:0.0000}");
         Console.Error.WriteLine($"Guess: {string.Join(",", F.XGuess)}");
     }
 
@@ -542,7 +544,7 @@ public partial class Solver
         else
         {
             double perTime = (1600.0 - F.sw.ElapsedMilliseconds) / (F.T - S.Turn + 2);
-            
+
             if (perTime >= 1.8)
             {
                 Target = Math.Min(ls.Count, 50);
@@ -721,7 +723,7 @@ public partial class Solver
             }
         }
 
-        if(false && best != 0 && S.Turn != 0)
+        if (false && best != 0 && S.Turn != 0)
         {
             Console.Error.WriteLine($"Turn {S.Turn} select {best}");
 
@@ -767,7 +769,7 @@ public partial class Solver
 
         long AttackAverage = 10L << L;
         long ans = 0;
-        ans += AttackAverage * Math.Min(200, NokoriTurn) * (F.K * F.K * F.N * F.M);
+        ans += AttackAverage * Math.Min(1000, NokoriTurn) * ((F.K * F.K * F.N * F.M) * 3 / 5);
         //ans += AttackAverage * NokoriTurn * 1000L / 10;
         ans += (long)money * 100L;
 
