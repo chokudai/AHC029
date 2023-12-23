@@ -51,8 +51,10 @@ class Tester
         //    {
         Parallel.For(0, TargetNum, tn =>
         {
-            Parallel.For(N_Min, N_Max + 1, n =>
-            {
+            //Parallel.For(N_Min, N_Max + 1, n =>
+            //{
+            for (int n = N_Min; n <= N_Max; n++)
+                {
                 for (int m = M_Min; m <= M_Max; m++)
                 {
                     for (int k = K_Min; k <= K_Max; k++)
@@ -101,7 +103,7 @@ class Tester
                         Console.WriteLine($"{tn} {n} {m} {k} : {sol.S.money}");
                     }
                 }
-            });
+            }//);
         });
 
         List<long> ll = new List<long>();

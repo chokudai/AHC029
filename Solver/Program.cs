@@ -21,7 +21,7 @@ public class Field
 
     //ローカルテスト用
     public Scanner cin;
-    public PreProject [] pps = new PreProject[0];
+    public PreProject[] pps = new PreProject[0];
     public (Card c, int cost)[][] pcs = new (Card c, int cost)[0][];
 
     public int[] XGuess;
@@ -120,9 +120,9 @@ public class Project
 public class Card
 {
     public int type;
-    public int work;
+    public long work;
 
-    public Card(int type, int work)
+    public Card(int type, long work)
     {
         this.type = type;
         this.work = work;
@@ -135,7 +135,7 @@ public class State
     public Field F;
 
     public Project[] ps;
-    public int[] damage;
+    public long[] damage;
     public Card[] cs;
     public long money;
     public int Turn;
@@ -155,7 +155,7 @@ public class State
         L = 0;
         this.ps = ps;
         this.cs = cs;
-        damage = new int[F.M];
+        damage = new long[F.M];
         PreTarget = -1;
     }
 
@@ -169,8 +169,10 @@ public class State
         this.PreUse = s.PreUse;
         this.UsedProject = s.UsedProject;
         this.L = s.L;
-        this.damage = (int[])s.damage.Clone();
+        this.damage = (long[])s.damage.Clone();
         this.PreTarget = s.PreTarget;
+
+        this.UpdateProjects = new List<int>(s.UpdateProjects);
     }
 
     public List<int> UpdateProjects = new List<int>();
@@ -213,7 +215,7 @@ public class State
         Turn++;
     }
 
-    public void Attack(int target, int d)
+    public void Attack(int target, long d)
     {
         damage[target] += d;
 
@@ -223,7 +225,7 @@ public class State
             UpdateProjects.Add(target);
             money += ps[target].V;
             damage[target] = 0;
-            if(target == PreTarget) PreTarget = -1;
+            if (target == PreTarget) PreTarget = -1;
         }
     }
 
@@ -236,7 +238,7 @@ public class State
     public void UpdateFromInput()
     {
         ps = new Project[F.M];
-        damage = new int[F.M];
+        damage = new long[F.M];
         for (int i = 0; i < F.M; i++)
         {
             long h = F.cin.nextLong();
@@ -244,7 +246,7 @@ public class State
             ps[i] = new Project(v, h);
         }
         long nextMoney = F.cin.nextLong();
-        if(money != nextMoney)
+        if (money != nextMoney)
         {
             Console.Error.WriteLine($"Error: money != nextMoney. {money} != {nextMoney}");
             money = nextMoney;
@@ -293,11 +295,16 @@ public class State
     }
 
 
-    public void BuyCard(Card c, int cost)
+    public void BuyCard(Card c, long cost)
     {
         cs[PreUse] = c;
         money -= cost;
         PreUse = -1;
+    }
+
+    public void BuyCard2(Card c, long cost, int L)
+    {
+        BuyCard(new Card(c.type, c.work << L), cost << L);
     }
 }
 
@@ -312,7 +319,7 @@ public partial class Solver
 
     public Solver()
     {
-        
+
     }
 
     public Field F = new Field(0, 0, 0, 0);
@@ -397,11 +404,11 @@ public partial class Solver
         F.sw.Start();
     }
 
-    void calc ()
+    void calc()
     {
         for (int i = 0; i < F.T; i++)
         {
-            if(i != 0)
+            if (i != 0)
             {
                 var CardList = GetCardList(S);
                 for (int j = 1; j < CardList.Length; j++)
@@ -454,8 +461,10 @@ public partial class Solver
             Console.WriteLine("0");
         }
 
-        Console.Error.WriteLine($"Score = {S.money} Level = {S.L}");
+        Console.Error.WriteLine($"Score = {S.money} Level = {S.L} N = {F.N} M = {F.M} K = {F.K} GP = {GreedyPlay}");
     }
+
+    int GreedyPlay = 0;
 
     (int buy, (int i, int t) use) choose(State S, (Card c, int cost)[] cs)
     {
@@ -466,7 +475,7 @@ public partial class Solver
         for (int i = 0; i < cs.Length; i++)
         {
             State NS = new State(S);
-            if(cs.Length != 1)
+            if (cs.Length != 1)
             {
                 if (S.L == 20 && cs[i].c.type == 4) continue;
                 NS.BuyCard(cs[i].c, cs[i].cost);
@@ -475,7 +484,7 @@ public partial class Solver
             for (int j = 0; j < S.cs.Length; j++)
             {
                 int K = 1;
-                
+
                 if (NS.cs[j].type == 0 || NS.cs[j].type == 2)
                 {
                     K = F.M;
@@ -494,11 +503,15 @@ public partial class Solver
         }
 
         ls.Sort((a, b) => -a.Score.CompareTo(b.Score));
+        //return ls[0].play;
 
-        
         if (ls.Count == 0) return (0, (0, 0));
 
-        if (F.sw.ElapsedMilliseconds >= 1800) return ls[0].play;
+        if (F.sw.ElapsedMilliseconds >= 1800)
+        {
+            GreedyPlay++;
+            return ls[0].play;
+        }
 
         int Target, CheckNum, CheckTurn;
         if (F.sw.ElapsedMilliseconds >= 1600)
@@ -509,41 +522,41 @@ public partial class Solver
         }
         else
         {
-            double perTime = (1600.0 - F.sw.ElapsedMilliseconds) /(F.T - S.Turn);
-            if (perTime >= 3.0)
+            double perTime = (1600.0 - F.sw.ElapsedMilliseconds) / (F.T - S.Turn);
+            if (perTime >= 1.5)
             {
                 Target = Math.Min(ls.Count, 8);
                 CheckNum = 100;
                 CheckTurn = Math.Min(5, F.T - S.Turn - 1);
             }
-            if (perTime >= 2.5)
+            if (perTime >= 1.4)
             {
                 Target = Math.Min(ls.Count, 7);
                 CheckNum = 50;
                 CheckTurn = Math.Min(5, F.T - S.Turn - 1);
             }
-            else if (perTime >= 2.0)
+            else if (perTime >= 1.3)
             {
                 Target = Math.Min(ls.Count, 7);
                 CheckNum = 20;
                 CheckTurn = Math.Min(5, F.T - S.Turn - 1);
             }
-            else if (perTime >= 1.6)
+            else if (perTime >= 1.2)
             {
                 Target = Math.Min(ls.Count, 5);
                 CheckNum = 10;
                 CheckTurn = Math.Min(5, F.T - S.Turn - 1);
             }
-            else if(perTime >= 1.3)
+            else if (perTime >= 1.1)
             {
                 Target = Math.Min(ls.Count, 3);
-                CheckNum = 10;
+                CheckNum = 5;
                 CheckTurn = Math.Min(5, F.T - S.Turn - 1);
             }
             else
             {
                 Target = Math.Min(ls.Count, 2);
-                CheckNum = 10;
+                CheckNum = 3;
                 CheckTurn = Math.Min(5, F.T - S.Turn - 1);
             }
         }
@@ -563,47 +576,106 @@ public partial class Solver
 
             for (int tar = 0; tar < Target; tar++)
             {
-                State now = ls[tar].S;
+                State now = new State(ls[tar].S);
                 int start = now.UsedProject;
 
                 for (int t = 0; t < CheckTurn; t++)
                 {
                     now.UpdateFromLPS(lpp, start);
 
-                    List<(long Score, State S, (int buy, (int i, int t) use) play)> ls2 = new List<(long Score, State S, (int buy, (int i, int t) use) play)>();
+                    List<(long Score, (int buy, (int i, int t) use) play)> ls2 = new List<(long Score, (int buy, (int i, int t) use) play)>();
 
                     var css = GetCardListWithPCS(now, pcs[t]);
                     for (int i = 0; i < css.Length; i++)
                     {
-                        State NS = new State(now);
-                        if (cs.Length != 1)
+                        Card BuyCard = css[i].c;
+
+                        for (int j = 0; j < now.cs.Length; j++)
                         {
-                            if (S.L == 20 && css[i].c.type == 4) continue;
-                            NS.BuyCard(css[i].c, css[i].cost);
-                            if (NS.money < 0) continue;
-                        }
-                        for (int j = 0; j < S.cs.Length; j++)
-                        {
+                            Card UseCard = now.cs[j];
+                            if (j == now.PreUse) UseCard = BuyCard;
+
                             int K = 1;
-                            if (NS.cs[j].type == 0 || NS.cs[j].type == 2)
-                            {
-                                K = F.M;
-                            }
+                            if (UseCard.type == 0 || UseCard.type == 2) K = F.M;
+
                             for (int k = 0; k < K; k++)
                             {
-                                if (NS.cs[j].type == 0 && NS.PreTarget != k && NS.PreTarget != -1) continue;
+                                if (UseCard.type == 0 && now.PreTarget != k && now.PreTarget != -1) continue;
 
-                                State NS2 = new State(NS);
-                                NS2.Simulate(j, k);
+                                long score = 0;
+                                score -= GetMoneyAndLevelValue(now.money, now.L, F.T - now.Turn);
 
-                                long score = Eval(NS2);
+                                long NextMoney = now.money;
+                                if (BuyCard != null) NextMoney -= (css[i].cost);
+                                int NextLevel = now.L;
 
-                                ls2.Add((score, NS2, (i, (j, k))));
+                                if (UseCard.type == 0)
+                                {
+                                    long HP = now.ps[k].HP - now.damage[k];
+                                    long V = now.ps[k].V;
+
+                                    score -= GetProjectValue(V, HP, NextLevel);
+                                    score += GetProjectValue(V, HP - UseCard.work, NextLevel);
+                                }
+                                else if (UseCard.type == 1)
+                                {
+                                    for (int l = 0; l < F.M; l++)
+                                    {
+                                        long HP = now.ps[l].HP - now.damage[l];
+                                        long V = now.ps[l].V;
+
+                                        score -= GetProjectValue(V, HP, NextLevel);
+                                        score += GetProjectValue(V, HP - UseCard.work, NextLevel);
+                                    }
+                                }
+                                else if (UseCard.type == 2)
+                                {
+                                    long HP = now.ps[k].HP - now.damage[k];
+                                    long V = now.ps[k].V;
+
+                                    score -= GetProjectValue(V, HP, NextLevel);
+                                    //score += 100L << NextLevel;
+                                }
+                                else if (UseCard.type == 3)
+                                {
+                                    for (int l = 0; l < F.M; l++)
+                                    {
+                                        long HP = now.ps[l].HP - now.damage[l];
+                                        long V = now.ps[l].V;
+
+                                        score -= GetProjectValue(V, HP, NextLevel);
+                                        //score += 100L << NextLevel;
+                                    }
+                                }
+                                else
+                                {
+                                    if (now.L == 20)
+                                    {
+                                        score -= long.MinValue / 8;
+                                    }
+                                    else
+                                    {
+                                        NextLevel++;
+                                    }
+                                }
+
+                                score += GetCardValue(BuyCard);
+                                score -= GetCardValue(UseCard);
+                                score += GetMoneyAndLevelValue(NextMoney, NextLevel, F.T - S.Turn);
+
+                                //Console.Error.WriteLine($"{score} {BuyCard.type} {BuyCard.work} {(css[i].cost)} {GetCardValue(BuyCard)} {UseCard.type} {UseCard.work} {GetCardValue(UseCard)} ");
+
+
+                                ls2.Add((score, (i, (j, k))));
                             }
                         }
                     }
                     ls2.Sort((a, b) => -a.Score.CompareTo(b.Score));
-                    now = ls2[0].S;
+
+                    //Console.Error.WriteLine(ls2[0].Score);
+
+                    now.BuyCard(css[ls2[0].play.buy].c, css[ls2[0].play.buy].cost);
+                    now.Simulate(ls2[0].play.use.i, ls2[0].play.use.t);
                 }
                 PointSum[tar] += Eval(now);
             }
@@ -620,95 +692,88 @@ public partial class Solver
 
         return ls[best].play;
     }
-    
+
+
+
+
+    long GetMoneyAndLevelValue(long money, int L, int NokoriTurn)
+    {
+        if (money < 0) return long.MinValue / 8;
+
+        long AttackAverage = 10L << L;
+        long ans = 0;
+        ans += AttackAverage * NokoriTurn * 100L / 10;
+        ans += (long)money * 100L;
+
+        return ans;
+    }
+
+
+    long GetCardValue(Card c)
+    {
+        if (c.type == 0)
+        {
+            return (long)c.work * 100L * 83 / 100;
+        }
+        else if (c.type == 1)
+        {
+            return (long)c.work * 100L * F.M * 4 / 5 * 83 / 100;
+        }
+        return 0;
+    }
+
+    long GetProjectValue(long V, long HP, int L)
+    {
+        if (HP <= 0)
+        {
+            return V * 100L + (100L << L);
+        }
+
+        double needValue = 1.0 - 0.2 * HP / V;
+        //return (long)((V - HP) * needValue * 100L);
+        return (long)((V - HP - (Math.Max(1, 8L - F.N) << L) * 1) * needValue * 100L);
+    }
+
+
     long Eval(State S)
     {
-
         if (F.T <= S.Turn + 2) return S.money;
         if (S.L > 20) return -99999999;
 
         int NokoriTurn = F.T - S.Turn;
-
         long AttackAverage = 10 << S.L;
-        //if(S.L > 10) AttackAverage += 12 << 10;
 
-        long Need = AttackAverage * 0;
-        
-        long ans = 0;
-        ans += AttackAverage * NokoriTurn * 100L / 10;
-        ans += (long)S.money * 100L;
+        long ans = GetMoneyAndLevelValue(S.money, S.L, NokoriTurn);
 
-        
-        long ans2 = 0;
 
-        int dec = F.K * 50 * 53 * F.XGuess[4] / 4 / F.Xsum;
-
-        if(S.money > (1L << S.L) * (1000 - dec))
-        {
-            ans2 = (S.money - (1L << S.L) * (1000 - dec)) * 100L;
-            ans2 += AttackAverage * 2 * NokoriTurn * 100L / 10;
-            if (ans2 > ans) ans = ans2;
-        }
-        
-
-        if(Need > S.money)
-        {
-            ans -= (Need - S.money) * 1000 * 100L;
-        }
 
         //カード評価
         for (int i = 0; i < S.cs.Length; i++)
         {
             if (S.PreUse == i) continue;
-            if (S.cs[i].type == 0)
-            {
-                ans += (long)S.cs[i].work * 100L * 83 / 100;
-
-                //if (S.cs[i].work <= (1 << S.L)) ans -= (1 << S.L);
-            }
-            else if (S.cs[i].type == 1)
-            {
-                ans += (long)S.cs[i].work * 100L * F.M * 4 / 5 * 83 / 100;
-            }
-            else if (S.cs[i].type == 2 || S.cs[i].type == 3)
-            {
-                //ans += AttackAverage / 2;
-            }
-            else if (S.cs[i].type == 4)
-            {
-                ans += 0;
-            }
-
+            ans += GetCardValue(S.cs[i]);
         }
 
         //プロジェクト評価
         for (int i = 0; i < F.M; i++)
         {
-            double needValue = 1.0 - 0.2 * (S.ps[i].HP - S.damage[i]) / S.ps[i].V;
-            ans += (long)((S.ps[i].V - (S.ps[i].HP - S.damage[i] + (Math.Max(1, 8L - F.N) << S.L))) * needValue * 100L);
-
-            //ans += (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 93 / 100;
-            //ans -= (long)(Math.Pow((S.ps[i].HP - S.damage[i]), 0.9) * 1L);
-
-            //double needTurn = (double)(S.ps[i].HP - S.damage[i]) / AttackAverage + 1;
-            //ans += (long)(AttackAverage / needTurn / 2) * 100L;
+            long HP = (S.ps[i].HP - S.damage[i]);
+            long V = S.ps[i].V;
+            ans += GetProjectValue(V, HP, S.L);
         }
         foreach (var i in S.UpdateProjects)
         {
-            double needValue = 1.0 - 0.2 * (S.ps[i].HP - S.damage[i]) / S.ps[i].V;
-            ans -= (long)((S.ps[i].V - (S.ps[i].HP - S.damage[i] + (Math.Max(1, 8L - F.N) << S.L))) * needValue * 100L);
-
-            //ans -= (S.ps[i].V - (S.ps[i].HP - S.damage[i]) ) * 100L * 93 / 100;
-            //ans += (long)(Math.Pow((S.ps[i].HP - S.damage[i]), 0.9) * 1L);
-
-            //double needTurn = (double)(S.ps[i].HP - S.damage[i]) / AttackAverage + 1;
-            //ans -= (long)(AttackAverage / needTurn / 2) * 100L;
+            long HP = (S.ps[i].HP - S.damage[i]);
+            long V = S.ps[i].V;
+            ans -= GetProjectValue(V, HP, S.L);
 
             ans += (long)AttackAverage * 10L;
         }
 
         return ans;
     }
+
+
 
 
     public (Card c, int cost)[][] MakeCL(int[] GuessX, int Sum, int CheckTurn)
@@ -759,7 +824,7 @@ public partial class Solver
 
     (Card c, int cost)[] GetCardList(State S)
     {
-        if(F.LocalFlag)
+        if (F.LocalFlag)
         {
             return GetCardListWithPCS(S, F.pcs[S.Turn - 1]);
         }
