@@ -462,6 +462,7 @@ public partial class Solver
         }
 
         Console.Error.WriteLine($"Score = {S.money} Level = {S.L} N = {F.N} M = {F.M} K = {F.K} GP = {GreedyPlay}");
+        Console.Error.WriteLine($"Guess: {string.Join(",", F.XGuess)}");
     }
 
     int GreedyPlay = 0;
@@ -563,9 +564,7 @@ public partial class Solver
 
 
 
-        long[] PointSum = new long[Target];
-
-
+        double[] PointSum = new double[Target];
 
 
         for (int cn = 0; cn < CheckNum; cn++)
@@ -677,7 +676,8 @@ public partial class Solver
                     now.BuyCard(css[ls2[0].play.buy].c, css[ls2[0].play.buy].cost);
                     now.Simulate(ls2[0].play.use.i, ls2[0].play.use.t);
                 }
-                PointSum[tar] += Eval(now);
+                PointSum[tar] += Math.Log(Eval(now));
+                //PointSum[tar] += Eval(now);
             }
         }
 
@@ -688,6 +688,40 @@ public partial class Solver
             {
                 best = i;
             }
+        }
+
+        if(false && best != 0 && S.Turn != 0)
+        {
+            Console.Error.WriteLine($"Turn {S.Turn} select {best}");
+
+            Console.Error.WriteLine("Sell Cards:");
+            for (int i = 0; i < cs.Length; i++)
+            {
+                var item = cs[i];
+                Console.Error.WriteLine($"id{i} Type:{item.c.type} Power:{item.c.work} Cost:{item.cost}");
+            }
+            Console.Error.WriteLine("My Cards:");
+            for (int i = 0; i < S.cs.Length; i++)
+            {
+                if (S.PreUse == i)
+                {
+                    Console.Error.WriteLine($"id{i} Already Used");
+                }
+                else
+                {
+                    var item = S.cs[i];
+                    Console.Error.WriteLine($"id{i} Type:{item.type} Power:{item.work}");
+                }
+            }
+
+            Console.Error.WriteLine("Projects:");
+            for (int i = 0; i < S.ps.Length; i++)
+            {
+                Console.Error.WriteLine($"id{i} HP: {S.ps[i].HP - S.damage[i]} Value: {S.ps[i].V}");
+            }
+
+            Console.Error.WriteLine($"Greedy Choice: Buy Card {ls[0].play.buy}, Use Card {ls[0].play.use.i} for Project {ls[0].play.use.t}");
+            Console.Error.WriteLine($"Search Choice: Buy Card {ls[best].play.buy}, Use Card {ls[best].play.use.i} for Project {ls[best].play.use.t}");
         }
 
         return ls[best].play;
@@ -705,6 +739,28 @@ public partial class Solver
         ans += AttackAverage * NokoriTurn * 100L / 10;
         ans += (long)money * 100L;
 
+        /*
+        int L2 = L;
+        long M2 = money;
+
+        double TurnPerLUP = (double)F.XGuess[4] / F.Xsum;
+        double chooseNum = 2 * TurnPerLUP;
+        long border = (long)(200 + 800 / (1 + chooseNum));
+
+        int cnt = 0;
+        while (L2 < 20)
+        {
+            M2 -= border * (1 << L2);
+            L2++;
+            cnt++;
+            if (M2 < 0) break;
+            long AA2 = 10L << L2;
+            long ans2 = AA2 * (NokoriTurn) * 10L + M2 * 100L;
+            if (ans2 > ans) ans = ans2;
+            else break;
+        }
+        */
+
         return ans;
     }
 
@@ -717,7 +773,7 @@ public partial class Solver
         }
         else if (c.type == 1)
         {
-            return (long)c.work * 100L * F.M * 4 / 5 * 83 / 100;
+            return (long)((long)c.work * 100L * (F.M - F.M * (F.M - 1) * 0.05) * 83 / 100);
         }
         return 0;
     }
@@ -730,8 +786,12 @@ public partial class Solver
         }
 
         double needValue = 1.0 - 0.2 * HP / V;
+        long mul = (long)((V - HP - (2L << L) * 1));
+        //if(mul <= 0) needValue = 0.2 - 0.2 * HP / V;
+
         //return (long)((V - HP) * needValue * 100L);
-        return (long)((V - HP - (Math.Max(1, 8L - F.N) << L) * 1) * needValue * 100L);
+        return (long)(mul * needValue * 100L);
+        //return (long)((V - HP + (Math.Max(1, 8L - F.N) << L) * 1) * needValue * 100L);
     }
 
 
