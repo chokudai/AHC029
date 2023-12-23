@@ -785,7 +785,7 @@ public partial class Solver
             return V * 100L + (100L << L);
         }
 
-        double needValue = 1.0 - 0.2 * HP / V;
+        double needValue = 1.0 - 0.3 * HP / V;
         long mul = (long)((V - HP - (2L << L) * 1));
         //if(mul <= 0) needValue = 0.2 - 0.2 * HP / V;
 
