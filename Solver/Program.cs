@@ -769,11 +769,11 @@ public partial class Solver
     {
         if (c.type == 0)
         {
-            return (long)c.work * 100L * 91 / 100;
+            return (long)c.work * 100L * 97 / 100;
         }
         else if (c.type == 1)
         {
-            return (long)((long)c.work * 100L * (F.M - F.M * (F.M - 1) * 0.05) * 91 / 100);
+            return (long)((long)c.work * 100L * (F.M - F.M * (F.M - 1) * 0.05) * 97 / 100);
         }
         return 0;
     }
