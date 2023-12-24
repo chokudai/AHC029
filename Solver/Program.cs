@@ -346,7 +346,7 @@ public partial class Solver
     }
 
     public Field F = new Field(0, 0, 0, 0);
-    public State S;
+    public State ALLS;
     Scanner cin;
 
     public Project[] InitProject;
@@ -418,7 +418,7 @@ public partial class Solver
             }
         }
 
-        S = new State(F, InitProject, InitCard);
+        ALLS = new State(F, InitProject, InitCard);
     }
 
     void init()
@@ -430,18 +430,20 @@ public partial class Solver
     void calc()
     {
         long MaxScore = 0;
-        S.CalcExpect();
+        int PreLevel = 0;
+        int LastLevelUp = 0;
+        ALLS.CalcExpect();
         for (int i = 0; i < F.T; i++)
         {
             if (i != 0)
             {
-                var CardList = GetCardList(S);
+                var CardList = GetCardList(ALLS);
                 for (int j = 1; j < CardList.Length; j++)
                 {
                     F.AddX(CardList[j].c.type);
                 }
 
-                var choice = choose(S, CardList);
+                var choice = choose(ALLS, CardList);
                 /*
                 Console.Error.WriteLine($"Buy CardType: {CardList[choice.buy].c.type} Power: {CardList[choice.buy].c.work} Cost:{CardList[choice.buy].cost}");
                 Console.Error.WriteLine($"Use CardType: {S.cs[choice.use.i].type} Power: {S.cs[choice.use.i].work} Target:{choice.use.t}");
@@ -451,8 +453,8 @@ public partial class Solver
                 }
                 */
 
-                S.BuyCard(CardList[choice.buy].c, CardList[choice.buy].cost);
-                S.Simulate(choice.use.i, choice.use.t);
+                ALLS.BuyCard(CardList[choice.buy].c, CardList[choice.buy].cost);
+                ALLS.Simulate(choice.use.i, choice.use.t);
 
 
                 if (!F.TestFlag)
@@ -460,27 +462,32 @@ public partial class Solver
                     Console.WriteLine($"{choice.buy}");
                     Console.WriteLine($"{choice.use.i} {choice.use.t}");
                 }
-                S.Update();
+                ALLS.Update();
             }
             else
             {
-                var choice = choose(S, null);
-                S.Simulate(choice.use.i, choice.use.t);
+                var choice = choose(ALLS, null);
+                ALLS.Simulate(choice.use.i, choice.use.t);
                 //Console.Error.WriteLine($"Use CardType: {S.cs[choice.use.i].type} Power: {S.cs[choice.use.i].work} Target:{choice.use.t}");
 
                 if (!F.TestFlag)
                 {
                     Console.WriteLine($"{choice.use.i} {choice.use.t}");
                 }
-                S.Update();
+                ALLS.Update();
             }
 
-            if (S.Turn < 3000)
+            if (ALLS.Turn < 3000)
             {
                 //Console.Error.WriteLine($"Turn: {S.Turn} Money: {S.money} Level: {S.L} Val: {Eval(S)}");
             }
-            MaxScore = Math.Max(MaxScore, S.money);
-            S.CalcExpect();
+            MaxScore = Math.Max(MaxScore, ALLS.money);
+            if(PreLevel != ALLS.L)
+            {
+                PreLevel= ALLS.L;
+                LastLevelUp = i;
+            }
+            ALLS.CalcExpect();
         }
 
         if (!F.TestFlag)
@@ -488,7 +495,7 @@ public partial class Solver
             Console.WriteLine("0");
         }
 
-        Console.Error.WriteLine($"Score = {S.money} Level = {S.L} N = {F.N} M = {F.M} K = {F.K} GP = {GreedyPlay} Rate = {(double)S.money / MaxScore:0.0000} Guess: {string.Join(",", F.XGuess)}");
+        Console.Error.WriteLine($"Score = {ALLS.money} Level = {ALLS.L} N = {F.N} M = {F.M} K = {F.K} GP = {GreedyPlay} Rate = {(double)ALLS.money / MaxScore:0.0000} LastLevelUp = {LastLevelUp} Guess: {string.Join(",", F.XGuess)}");
     }
 
     int GreedyPlay = 0;
@@ -567,7 +574,7 @@ public partial class Solver
         }
         else
         {
-            double perTime = (1600.0 - F.sw.ElapsedMilliseconds) / (F.T - S.Turn + 2);
+            double perTime = (1600.0 - F.sw.ElapsedMilliseconds) / (F.T - S.Turn + 5);
 
             if (perTime >= 1.8)
             {
@@ -618,7 +625,6 @@ public partial class Solver
                 CheckTurn = Math.Min(5, F.T - S.Turn - 1);
             }
         }
-
 
 
         double[] PointSum = new double[Target];
@@ -798,8 +804,8 @@ public partial class Solver
         ans += (long)money * 100L;
         */
 
-        double AverageGetMoney = (1 << L) * 300.0 / S.AverageLevel;
-        double ConsiderTime = Math.Min(NokoriTurn, S.AverageLevel * 2);
+        double AverageGetMoney = (1 << L) * 300.0 / ALLS.AverageLevel;
+        double ConsiderTime = Math.Min(NokoriTurn, ALLS.AverageLevel * 2);
         //double ConsiderTime = Math.Min(NokoriTurn, F.T);
 
 
@@ -870,6 +876,52 @@ public partial class Solver
         //return (long)((V - HP + (Math.Max(1, 8L - F.N) << L) * 1) * needValue * 100L);
     }
 
+    long GetAshibumiValue((long hp, long v)[] ps, long all, long money, int L, int nokoriTurn)
+    {
+        double LL = 1L << L;
+        double target = 20 * LL;// F.M;
+        if (money + all >= target) return 0;
+
+
+        double need = 0;
+        double dm = money;
+
+
+        Array.Sort(ps, (a, b) => a.hp.CompareTo(b.hp));
+
+
+        double allNokori = all;
+
+        for (int i = 0; i < ps.Length; i++)
+        {
+            long hp = Math.Min(ps[i].hp - all, 0);
+            if (ps[i].v < hp) continue;
+            if (hp >= target) continue;
+
+            allNokori -= Math.Min(ps[i].v, ps[i].hp) - hp; 
+
+            double add = Math.Max(0, hp - dm);
+            need += add;
+            dm += add + (ps[i].v - hp);
+        }
+        if (allNokori > 0) dm += allNokori;
+
+        if(target > dm)
+        {
+            need += target - dm;
+        }
+
+        double needTurn = Math.Min(nokoriTurn, need / LL);
+
+        if (need == 0) return 0;
+        //return 0;
+
+        double AverageGetMoney = (1 << L) * 300.0 / ALLS.AverageLevel;
+        long ans = 0;
+        ans += (long)(needTurn * AverageGetMoney * 100L);
+        return ans;
+    }
+
 
     long Eval(State S)
     {
@@ -882,13 +934,19 @@ public partial class Solver
         long ans = GetMoneyAndLevelValue(S.money, S.L, NokoriTurn);
 
 
+        long solo = 0;
+        long group = 0;
 
         //カード評価
         for (int i = 0; i < S.cs.Length; i++)
         {
             if (S.PreUse == i) continue;
             ans += GetCardValue(S.cs[i]);
+            if (S.cs[i].type == 0) solo += S.cs[i].work;
+            if (S.cs[i].type == 1) group += S.cs[i].work;
         }
+
+        List<(long hp, long v)> psl = new List<(long hp, long v)>();
 
         //プロジェクト評価
         for (int i = 0; i < F.M; i++)
@@ -896,6 +954,7 @@ public partial class Solver
             long HP = (S.ps[i].HP - S.damage[i]);
             long V = S.ps[i].V;
             ans += GetProjectValue(V, HP, S.L);
+            psl.Add((HP, V));
         }
         foreach (var i in S.UpdateProjects)
         {
@@ -904,7 +963,10 @@ public partial class Solver
             ans -= GetProjectValue(V, HP, S.L);
 
             ans += (long)AttackAverage * 10L;
+            psl.Remove((HP, V));
         }
+
+        ans -= GetAshibumiValue(psl.ToArray(), group, S.money + solo, S.L, NokoriTurn);
 
         return ans;
     }

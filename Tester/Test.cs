@@ -99,9 +99,9 @@ class Tester
 
                         sol.run();
 
-                        result[CaseNum] = (n, m, k, sol.S.money);
+                        result[CaseNum] = (n, m, k, sol.ALLS.money);
 
-                        Console.WriteLine($"{tn} {n} {m} {k} : {sol.S.money}");
+                        Console.WriteLine($"{tn} {n} {m} {k} : {sol.ALLS.money}");
                     }
                 }
             }//);
