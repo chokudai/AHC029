@@ -805,7 +805,7 @@ public partial class Solver
         */
 
         double AverageGetMoney = (1 << L) * 300.0 / ALLS.AverageLevel;
-        double ConsiderTime = Math.Min(NokoriTurn, ALLS.AverageLevel * 2);
+        double ConsiderTime = Math.Min(NokoriTurn, ALLS.AverageLevel * (1.1 + 0.135 * F.M) );
         //double ConsiderTime = Math.Min(NokoriTurn, F.T);
 
 
