@@ -4,6 +4,7 @@ using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices.Marshalling;
 using System.Security.Cryptography.X509Certificates;
 
 public class Field
@@ -463,8 +464,7 @@ public partial class Solver
             Console.WriteLine("0");
         }
 
-        Console.Error.WriteLine($"Score = {S.money} Level = {S.L} N = {F.N} M = {F.M} K = {F.K} GP = {GreedyPlay} Rate = {(double)S.money / MaxScore:0.0000}");
-        Console.Error.WriteLine($"Guess: {string.Join(",", F.XGuess)}");
+        Console.Error.WriteLine($"Score = {S.money} Level = {S.L} N = {F.N} M = {F.M} K = {F.K} GP = {GreedyPlay} Rate = {(double)S.money / MaxScore:0.0000} Guess: {string.Join(",", F.XGuess)}");
     }
 
     int GreedyPlay = 0;
@@ -767,11 +767,34 @@ public partial class Solver
     {
         if (money < 0) return long.MinValue / 8;
 
+        /*
         long AttackAverage = 10L << L;
         long ans = 0;
         ans += AttackAverage * Math.Min(1000, NokoriTurn) * ((F.K * F.K * F.N * F.M) * 3 / 5);
-        //ans += AttackAverage * NokoriTurn * 1000L / 10;
         ans += (long)money * 100L;
+        */
+
+        double AverageLevelUp;
+        if (S.L <= 3) AverageLevelUp = 300.0 / F.K;
+        else AverageLevelUp = Math.Min(20, Math.Max(300.0 / F.K, (double)(F.T) / S.L));
+
+        double AverageGetMoney = (1 << L) * 300.0 / AverageLevelUp;
+
+        double ConsiderTime = Math.Min(NokoriTurn, AverageLevelUp * 2);
+        //double ConsiderTime = Math.Min(NokoriTurn, F.T);
+
+
+        //ConsiderTime = Math.Max(0, ConsiderTime - Math.Min(0, 5 - (double)money / (1L << L)));
+
+        //Console.Error.WriteLine(L + " " + AverageGetMoney + " " + AverageLevelUp + " " + ConsiderTime + " " + money);
+
+        long ans = 0;
+        ans += (long)(ConsiderTime * AverageGetMoney * 100L);
+        ans += (long)money * 100L;
+
+
+
+        
 
         /*
         int L2 = L;
