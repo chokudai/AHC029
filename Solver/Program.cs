@@ -314,7 +314,6 @@ public class State
         BuyCard(new Card(c.type, c.work << L), cost << L);
     }
 
-    public double ExpectLevelUp;
     public double AverageLevel;
 
     public void CalcExpect()
@@ -325,7 +324,6 @@ public class State
         if (L <= 3) averageLevelUp = expectLevelUp;
         else averageLevelUp = Math.Max(20, Math.Min(expectLevelUp, (double)(Turn) / L));
 
-        ExpectLevelUp = expectLevelUp;
         AverageLevel = averageLevelUp;
     }
 
@@ -740,8 +738,26 @@ public partial class Solver
 
                     //Console.Error.WriteLine(ls2[0].Score);
 
+                    //int target = Math.Min(ls2.Count, 10);
+                    //State NS = new State(now);
+
                     now.BuyCard(css[ls2[0].play.buy].c, css[ls2[0].play.buy].cost);
                     now.Simulate(ls2[0].play.use.i, ls2[0].play.use.t);
+                    /*
+                    double SS = Eval(now);
+                    for (int i = 1; i < target; i++)
+                    {
+                        State now2 = new State(NS);
+                        now2.BuyCard(css[ls2[i].play.buy].c, css[ls2[i].play.buy].cost);
+                        now2.Simulate(ls2[i].play.use.i, ls2[i].play.use.t);
+                        double S2 = Eval(now2);
+                        if(SS < S2)
+                        {
+                            SS = S2;
+                            now = now2;
+                        }
+                    }
+                    */
                 }
                 PointSum[tar] += Math.Log(Math.Max(10, Eval(now)));
                 //PointSum[tar] += Math.Log(Math.Max(1e-300, Eval(now)));
@@ -768,7 +784,7 @@ public partial class Solver
             Console.WriteLine($"#Select {best}");
             for (int i = 0; i < Target; i++)
             {
-                Console.WriteLine($"#id {i}: Buy Card {ls[i].play.buy}, Use Card {ls[i].play.use.i} for Project {ls[0].play.use.t} Greedy Score: {ls[i].Score} Search Score: {PointSum[i]}");
+                Console.WriteLine($"#id {i}: Buy Card {ls[i].play.buy}, Use Card {ls[i].play.use.i} for Project {ls[i].play.use.t} Greedy Score: {ls[i].Score} Search Score: {PointSum[i]}");
             }
         }
 
@@ -901,12 +917,13 @@ public partial class Solver
         //return (long)((V - HP + (Math.Max(1, 8L - F.N) << L) * 1) * needValue * 100L);
     }
 
-    long GetAshibumiValue((long hp, long v)[] ps, long all, long money, int L, int nokoriTurn)
+
+    long GetAshibumiValue((long hp, long v)[] ps, long all, double money, int L, int nokoriTurn)
     {
         //return 0;
         double LL = 1L << L;
         //double target = 30 * LL / F.N / F.N;// F.M;
-        double target = 15 * LL;
+        double target = 50 * LL;
         if (money + all >= target) return 0;
 
 
@@ -938,13 +955,15 @@ public partial class Solver
             need += target - dm;
         }
 
-        double needTurn = Math.Min(nokoriTurn, need / LL);
-
         if (need == 0) return 0;
+
+        double needTurn = Math.Min(nokoriTurn, need / LL);
+        needTurn = needTurn * needTurn / 20;
+
 
         double AverageGetMoney = (1 << L) * 300.0 / ALLS.AverageLevel;
         long ans = 0;
-        ans += (long)(needTurn * AverageGetMoney * 100000L);
+        ans += (long)(needTurn * AverageGetMoney * 100L);
         return ans;
     }
 
