@@ -42,6 +42,7 @@ class Tester
         if (File.Exists(FileName))
         {
             Console.Error.WriteLine("注意：もう実行されているバージョンです。このまま実行すると上書きします。");
+            Console.ReadLine();
         }
 
         int CaseNumber = 0;
