@@ -145,6 +145,8 @@ public class State
     public int L;
     public int PreTarget;
 
+    
+
     public State(Field F, Project[] ps, Card[] cs)
     {
         this.F = F;
@@ -175,6 +177,10 @@ public class State
 
         this.UpdateProjects = new List<int>(s.UpdateProjects);
     }
+
+
+
+
 
     public List<int> UpdateProjects = new List<int>();
 
@@ -307,6 +313,22 @@ public class State
     {
         BuyCard(new Card(c.type, c.work << L), cost << L);
     }
+
+    public double ExpectLevelUp;
+    public double AverageLevel;
+
+    public void CalcExpect()
+    {
+        double expectLevelUp = 1000.0 / F.K / Math.Sqrt(F.N * F.M);
+        //double expectLevelUp = 300.0 / F.K;
+        double averageLevelUp;
+        if (L <= 3) averageLevelUp = expectLevelUp;
+        else averageLevelUp = Math.Min(20, Math.Max(expectLevelUp, (double)(F.T) / L));
+
+        ExpectLevelUp = expectLevelUp;
+        AverageLevel = averageLevelUp;
+    }
+
 }
 
 public partial class Solver
@@ -408,6 +430,7 @@ public partial class Solver
     void calc()
     {
         long MaxScore = 0;
+        S.CalcExpect();
         for (int i = 0; i < F.T; i++)
         {
             if (i != 0)
@@ -457,6 +480,7 @@ public partial class Solver
                 //Console.Error.WriteLine($"Turn: {S.Turn} Money: {S.money} Level: {S.L} Val: {Eval(S)}");
             }
             MaxScore = Math.Max(MaxScore, S.money);
+            S.CalcExpect();
         }
 
         if (!F.TestFlag)
@@ -774,13 +798,8 @@ public partial class Solver
         ans += (long)money * 100L;
         */
 
-        double AverageLevelUp;
-        if (S.L <= 3) AverageLevelUp = 300.0 / F.K;
-        else AverageLevelUp = Math.Min(20, Math.Max(300.0 / F.K, (double)(F.T) / S.L));
-
-        double AverageGetMoney = (1 << L) * 300.0 / AverageLevelUp;
-
-        double ConsiderTime = Math.Min(NokoriTurn, AverageLevelUp * 2);
+        double AverageGetMoney = (1 << L) * 300.0 / S.AverageLevel;
+        double ConsiderTime = Math.Min(NokoriTurn, S.AverageLevel * 2);
         //double ConsiderTime = Math.Min(NokoriTurn, F.T);
 
 
