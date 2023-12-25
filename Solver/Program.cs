@@ -324,8 +324,9 @@ public class State
 
     public void CalcExpect()
     {
-        double expectLevelUp = 1000.0 / F.K / Math.Sqrt(F.N * F.M);
+        //double expectLevelUp = 1000.0 / F.K / Math.Sqrt(F.N * F.M);
         //double expectLevelUp = 700.0 / F.K / Math.Sqrt(F.M) / Math.Pow(F.N, 0.2);
+        double expectLevelUp = 250.0 / F.K / Math.Sqrt(F.M);
         //double expectLevelUp = 300.0 / F.K;
         double averageLevelUp;
         if (L <= 3) averageLevelUp = expectLevelUp;
@@ -764,6 +765,7 @@ public partial class Solver
 
                         for (int j = 0; j < now.cs.Length; j++)
                         {
+                            //if (j >= 4 && j != now.PreUse) continue;
                             Card UseCard = now.cs[j];
                             if (j == now.PreUse) UseCard = BuyCard;
 
