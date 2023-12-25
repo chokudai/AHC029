@@ -129,6 +129,7 @@ class Tester
         }
 
 
+
         List<long> ScoreBorder = new List<long>();
         long[] ScoreArray = (long[])MaxScore.Clone();
         Array.Sort(ScoreArray);

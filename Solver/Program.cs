@@ -637,7 +637,7 @@ public partial class Solver
         }
 
 
-        
+
         /*
         List<(long Score, State S, (int buy, (int i, int t) use) play)> ls3 = new List<(long Score, State S, (int buy, (int i, int t) use) play)>();
         int[] limit = new int[] { 100, 2, 2, 1, 1 };
@@ -793,7 +793,7 @@ public partial class Solver
 
                     now.BuyCard(css[ls2[0].play.buy].c, css[ls2[0].play.buy].cost);
                     now.Simulate(ls2[0].play.use.i, ls2[0].play.use.t);
-                    
+
                     /*
                     double SS = Eval(now);
                     for (int i = 1; i < target; i++)
@@ -809,7 +809,7 @@ public partial class Solver
                         }
                     }
                     */
-                    
+
                 }
                 PointSum[tar] += Math.Log(Math.Max(10, Eval(now)));
                 //PointSum[tar] += Math.Log(Math.Max(1e-300, Eval(now)));
@@ -841,7 +841,7 @@ public partial class Solver
             }
         }
 
-        if(best != 0)
+        if (best != 0)
         {
             Card useBestCard = S.cs[ls[best].play.use.i];
             if (S.PreUse == ls[best].play.use.i) useBestCard = cs[ls[best].play.buy].c;
@@ -1024,7 +1024,7 @@ public partial class Solver
             need2 += add;
             dm += add + (ps[i].v - hp);
 
-            if(need2 > 0)
+            if (need2 > 0)
             {
                 double mul = Math.Max(0, need2 / target);
                 long val = GetProjectValue(ps[i].v, ps[i].hp, L);
