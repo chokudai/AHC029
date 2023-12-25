@@ -325,6 +325,7 @@ public class State
     public void CalcExpect()
     {
         double expectLevelUp = 1000.0 / F.K / Math.Sqrt(F.N * F.M);
+        //double expectLevelUp = 700.0 / F.K / Math.Sqrt(F.M) / Math.Pow(F.N, 0.2);
         //double expectLevelUp = 300.0 / F.K;
         double averageLevelUp;
         if (L <= 3) averageLevelUp = expectLevelUp;
@@ -808,7 +809,7 @@ public partial class Solver
                                     long V = now.ps[k].V;
 
                                     score -= GetProjectValue(V, HP, NextLevel);
-                                    //score += 60L << NextLevel;
+                                    //score -= 200L << NextLevel;
                                     //score += typeFixValue[2] * (1 << now.L);
                                 }
                                 else if (UseCard.type == 3)
@@ -820,6 +821,7 @@ public partial class Solver
 
                                         score -= GetProjectValue(V, HP, NextLevel);
                                         //score += 100L << NextLevel;
+                                        //score -= 200L << NextLevel;
                                     }
                                     //score += 60L << NextLevel;
                                     //score += typeFixValue[3] * (1 << now.L);
@@ -1074,7 +1076,7 @@ public partial class Solver
 
         double needValue = 1.0 - 0.25 * HP / V;
         //long mul = (long)((V - HP - (2L << L) * 1));
-        long mul = (long)((V - HP) - (3L << L) * 1);
+        long mul = (long)((V - HP));
 
         /*
         if (mul > 0)
@@ -1084,7 +1086,7 @@ public partial class Solver
         }
         */
 
-        return (long)(mul * needValue * 100L);
+        return (long)(mul * needValue * 100L) - (300L << L);
     }
 
 
