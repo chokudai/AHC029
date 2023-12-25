@@ -9,6 +9,7 @@ using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices.Marshalling;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 public class Field
 {
@@ -716,6 +717,12 @@ public partial class Solver
         double[] PointSum = new double[Target];
 
 
+        List<double>[] CheckList = new List<double>[Target];
+        for (int i = 0; i < Target; i++)
+        {
+            CheckList[i] = new List<double>();
+        }
+
         for (int cn = 0; cn < CheckNum; cn++)
         {
             (Card c, int cost)[][] pcs = MakeCL(F.XGuess, F.Xsum, CheckTurn);
@@ -869,7 +876,9 @@ public partial class Solver
 
                 }
                 //PointSum[tar] += Math.Log(Eval(now));
-                PointSum[tar] += Math.Log(Math.Max(10, Eval(now)));
+                double addscore = Math.Log(Math.Max(10, Eval(now)));
+                CheckList[tar].Add(addscore);
+                PointSum[tar] += addscore;
                 //PointSum[tar] += Math.Log(Math.Max(1e-300, Eval(now)));
                 //PointSum[tar] += Math.Log(Math.Max(10, Eval(now)));
                 //PointSum[tar] += Math.Max(0, Eval(now));
@@ -897,6 +906,34 @@ public partial class Solver
             for (int i = 0; i < Target; i++)
             {
                 logs.Add($"#id {i}: Buy Card {ls[i].play.buy}, Use Card {ls[i].play.use.i} for Project {ls[i].play.use.t} Greedy Score: {ls[i].Score} Search Score: {PointSum[i]}");
+                CheckList[i].Sort();
+                if (CheckList[i].Count <= 8)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append("#");
+                    for (int k = 0; k < CheckList[i].Count; k++)
+                    {
+                        sb.Append($" {CheckList[i][k]:0.00}");
+                    }
+                    logs.Add(sb.ToString());
+                }
+                else
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append("#");
+                    for (int k = 0; k < 3; k++)
+                    {
+                        sb.Append($" {CheckList[i][k]:0.00}");
+                    }
+
+                    sb.Append(" ...");
+                    for (int k = 0; k < 3; k++)
+                    {
+                        sb.Append($" {CheckList[i][CheckList[i].Count - 3 + k]:0.00}");
+                    }
+                    logs.Add(sb.ToString());
+                }
+            
             }
         }
 
@@ -983,7 +1020,7 @@ public partial class Solver
 
         long ans = 0;
         ans += (long)(ConsiderTime * AverageGetMoney * 100L);
-        ans += (long)money * 100L;
+        ans += (long)money * 105L;
 
 
 
@@ -1023,7 +1060,7 @@ public partial class Solver
         }
         else if (c.type == 1)
         {
-            return (long)((long)c.work * 100L * (F.M - F.M * (F.M - 1) * 0.05) * 97 / 100);
+            return (long)((long)c.work * 100L * (0.1 + F.M * 0.9 - F.M * (F.M - 1) * 0.045) * 97 / 100);
         }
         return 0;
     }
@@ -1032,11 +1069,12 @@ public partial class Solver
     {
         if (HP <= 0)
         {
-            return V * 100L + (100L << L);
+            return V * 105L + (0L << L);
         }
 
         double needValue = 1.0 - 0.25 * HP / V;
-        long mul = (long)((V - HP - (2L << L) * 1));
+        //long mul = (long)((V - HP - (2L << L) * 1));
+        long mul = (long)((V - HP) - (3L << L) * 1);
 
         /*
         if (mul > 0)
