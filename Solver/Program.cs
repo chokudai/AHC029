@@ -332,7 +332,7 @@ public class State
         AverageLevel = averageLevelUp;
 
         //fix = 0;
-        fix = 0.3 * ((double)F.K * F.XGuess[4] / F.Xsum - 14.0 / 53);
+        fix = 0.6 * ((double)F.K * F.XGuess[4] / F.Xsum - 14.0 / 53);
         //Console.Error.WriteLine(fix);
 
         /*
