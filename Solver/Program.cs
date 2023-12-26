@@ -763,7 +763,7 @@ public partial class Solver
 
         for (int cn = 0; cn < CheckNum * 3; cn++)
         {
-            if(cn == CheckNum)
+            if (cn == CheckNum)
             {
                 List<(double Score, int id)> l = new List<(double Score, int id)>();
                 for (int k = 0; k < Target; k++)
@@ -814,7 +814,7 @@ public partial class Solver
                         nextA -= css[i].cost;
                         if (BuyCard.type == 0 || BuyCard.type == 1) nextA += BuyCard.work;
 
-
+                        
                         for (int j = 0; j < now.cs.Length; j++)
                         {
                             //if (j >= 4 && j != now.PreUse) continue;
@@ -824,8 +824,9 @@ public partial class Solver
                             int K = 1;
                             if (UseCard.type == 0 || UseCard.type == 2) K = F.M;
 
-                            int TARGET = 0;
-                            if (cs.Length != 1 && cs[i].c.type == 0)
+                            int TARGET = now.PreTarget;
+
+                            if (UseCard.type == 0 && F.K != 2)
                             {
                                 double bestValue = -9999999;
                                 for (int l = 0; l < F.M; l++)
@@ -850,6 +851,9 @@ public partial class Solver
                                             tmp = UseCard.work + V * UseCard.work / (double)hp * 0.85;
                                         }
                                     }
+
+                                    if (now.PreTarget == l) tmp *= 1.2;
+
                                     if (tmp > bestValue)
                                     {
                                         bestValue = tmp;
@@ -862,10 +866,9 @@ public partial class Solver
                             for (int k = 0; k < K; k++)
                             {
                                 //if (UseCard.type == 0 && now.PreTarget != k && now.PreTarget != -1) continue;
-                                if (UseCard.type == 0 && k != TARGET) continue;
+                                if (UseCard.type == 0 && k != TARGET && TARGET != -1) continue;
 
                                 long score = 0;
-                                score -= GetMoneyAndLevelValue(now.money, now.L, F.T - now.Turn);
 
                                 long NextMoney = now.money;
                                 if (BuyCard != null) NextMoney -= (css[i].cost);
@@ -879,6 +882,7 @@ public partial class Solver
                                     score -= GetProjectValue(V, HP, NextLevel);
                                     score += GetProjectValue(V, HP - UseCard.work, NextLevel);
 
+                                    if (now.PreTarget == k) score = score * 6 / 5;
                                     //score += typeFixValue[0] * (1 << now.L);
                                 }
                                 else if (UseCard.type == 1)
@@ -931,6 +935,7 @@ public partial class Solver
 
                                 score += GetCardValue(BuyCard);
                                 score -= GetCardValue(UseCard);
+                                score -= GetMoneyAndLevelValue(now.money, now.L, F.T - now.Turn);
                                 score += GetMoneyAndLevelValue(NextMoney, NextLevel, F.T - S.Turn);
 
                                 //Console.Error.WriteLine($"{score} {BuyCard.type} {BuyCard.work} {(css[i].cost)} {GetCardValue(BuyCard)} {UseCard.type} {UseCard.work} {GetCardValue(UseCard)} ");
@@ -1021,7 +1026,7 @@ public partial class Solver
                     }
                     logs.Add(sb.ToString());
                 }
-            
+
             }
         }
 
@@ -1213,15 +1218,15 @@ public partial class Solver
 
             if (need2 > 0)
             {
-                double mul = Math.Max(0, need2 / target);
+                double mul = 1 - Math.Exp(-need2 / target * 1.5); //Math.Max(0, need2 / target);
                 long val = GetProjectValue(ps[i].v, ps[i].hp, L);
                 if (val > 0)
                 {
-                    dec += (long)(val * mul * mul);
+                    dec += (long)(val * mul);
                 }
             }
         }
-        //return dec;
+        return dec;
 
         if (allNokori > 0) dm += allNokori;
 
@@ -1231,7 +1236,7 @@ public partial class Solver
         }
 
         if (need == 0) return dec;
-        return dec;
+        //return dec;
 
         double needTurn = Math.Min(nokoriTurn, need / LL);
         needTurn = needTurn * needTurn / 20;
