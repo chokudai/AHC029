@@ -545,9 +545,11 @@ public partial class Solver
 
 
         bool[] same = new bool[S.cs.Length];
+        bool defaultCard = false;
         for (int i = 0; i < S.cs.Length; i++)
         {
             if (S.PreUse == i) continue;
+            if (S.cs[i].type == 0 && S.cs[i].work == 1L << S.L) defaultCard = true;
             for (int j = 0; j < i; j++)
             {
                 if (S.PreUse == j) continue;
@@ -562,11 +564,13 @@ public partial class Solver
         int[] miniType = new int[5];
         miniType[2] = miniType[3] = miniType[4] = -1;
 
+
         if (cs.Length != 1)
         {
             for (int i = 0; i < cs.Length; i++)
             {
                 int type = cs[i].c.type;
+
                 if (type >= 2)
                 {
                     if (miniType[type] == -1 || cs[miniType[type]].cost > cs[i].cost)
@@ -592,39 +596,14 @@ public partial class Solver
             for (int j = 0; j < S.cs.Length; j++)
             {
                 if (same[j]) continue;
+                if (cs.Length != 1 && i == 0 && j == S.PreUse && defaultCard) continue;
+
                 int K = 1;
 
                 if (NS.cs[j].type == 0 || NS.cs[j].type == 2)
                 {
                     K = F.M;
                 }
-                /*
-                int TARGET = 0;
-                if (cs.Length != 1 && cs[i].c.type == 0)
-                {
-                    double bestValue = -9999999;
-                    var UseCard = cs[i].c;
-                    for (int l = 0; l < F.M; l++)
-                    {
-                        double tmp;
-                        long hp = NS.ps[l].HP - NS.damage[l];
-                        long V = NS.ps[l].V;
-                        if (UseCard.work >= hp)
-                        {
-                            tmp = hp + V;
-                        }
-                        else
-                        {
-                            tmp = UseCard.work + V * (UseCard.work / (double)hp);
-                        }
-                        if (tmp > bestValue)
-                        {
-                            bestValue = tmp;
-                            TARGET = l;
-                        }
-                    }
-                }
-                */
 
                 if (NS.cs[j].type == 4 && NS.L >= 20) continue;
                 if (cs.Length != 1 && cs[i].c.type == 4 && NS.cs[j].type != 4) continue;

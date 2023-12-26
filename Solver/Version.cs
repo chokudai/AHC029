@@ -2,5 +2,5 @@
 public partial class Solver
 {
     //上げて実行するときは必ずコミットする！
-    static public int SolverVersion = 215;
+    static public int SolverVersion = 216;
 }
