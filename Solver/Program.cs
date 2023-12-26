@@ -598,11 +598,41 @@ public partial class Solver
                 {
                     K = F.M;
                 }
+                /*
+                int TARGET = 0;
+                if (cs.Length != 1 && cs[i].c.type == 0)
+                {
+                    double bestValue = -9999999;
+                    var UseCard = cs[i].c;
+                    for (int l = 0; l < F.M; l++)
+                    {
+                        double tmp;
+                        long hp = NS.ps[l].HP - NS.damage[l];
+                        long V = NS.ps[l].V;
+                        if (UseCard.work >= hp)
+                        {
+                            tmp = hp + V;
+                        }
+                        else
+                        {
+                            tmp = UseCard.work + V * (UseCard.work / (double)hp);
+                        }
+                        if (tmp > bestValue)
+                        {
+                            bestValue = tmp;
+                            TARGET = l;
+                        }
+                    }
+                }
+                */
+
                 if (NS.cs[j].type == 4 && NS.L >= 20) continue;
                 if (cs.Length != 1 && cs[i].c.type == 4 && NS.cs[j].type != 4) continue;
 
                 for (int k = 0; k < K; k++)
                 {
+                    //if (cs.Length != 1 && cs[i].c.type == 0 && k != TARGET) continue;
+
                     State NS2 = new State(NS);
                     NS2.Simulate(j, k);
                     //NS2.Update();
@@ -794,9 +824,45 @@ public partial class Solver
                             int K = 1;
                             if (UseCard.type == 0 || UseCard.type == 2) K = F.M;
 
+                            int TARGET = 0;
+                            if (cs.Length != 1 && cs[i].c.type == 0)
+                            {
+                                double bestValue = -9999999;
+                                for (int l = 0; l < F.M; l++)
+                                {
+                                    double tmp;
+                                    long hp = now.ps[l].HP - now.damage[l];
+                                    long V = now.ps[l].V;
+
+                                    double needValue = 1.0 - 0.25 * hp / V;
+                                    if (UseCard.work >= hp)
+                                    {
+                                        tmp = hp + V;
+                                    }
+                                    else
+                                    {
+                                        if (ALLS.money < (200L << ALLS.L))
+                                        {
+                                            tmp = UseCard.work + V * Math.Pow(UseCard.work / (double)hp, 1.4) * 0.93;
+                                        }
+                                        else
+                                        {
+                                            tmp = UseCard.work + V * UseCard.work / (double)hp * 0.85;
+                                        }
+                                    }
+                                    if (tmp > bestValue)
+                                    {
+                                        bestValue = tmp;
+                                        TARGET = l;
+                                    }
+                                }
+                            }
+
+
                             for (int k = 0; k < K; k++)
                             {
-                                if (UseCard.type == 0 && now.PreTarget != k && now.PreTarget != -1) continue;
+                                //if (UseCard.type == 0 && now.PreTarget != k && now.PreTarget != -1) continue;
+                                if (UseCard.type == 0 && k != TARGET) continue;
 
                                 long score = 0;
                                 score -= GetMoneyAndLevelValue(now.money, now.L, F.T - now.Turn);
