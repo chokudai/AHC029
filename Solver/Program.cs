@@ -330,7 +330,7 @@ public class State
         //double expectLevelUp = 300.0 / F.K;
         double averageLevelUp;
         if (L <= 3) averageLevelUp = expectLevelUp;
-        else averageLevelUp = Math.Max(20, Math.Min(expectLevelUp, (double)(Turn) / L));
+        else averageLevelUp = Math.Max(20, Math.Min(expectLevelUp * 1.6, (double)(Turn) / L) * 0.8);
 
         AverageLevel = averageLevelUp;
 
