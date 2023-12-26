@@ -793,7 +793,7 @@ public partial class Solver
                         nextA -= css[i].cost;
                         if (BuyCard.type == 0 || BuyCard.type == 1) nextA += BuyCard.work;
 
-                        
+
                         for (int j = 0; j < now.cs.Length; j++)
                         {
                             //if (j >= 4 && j != now.PreUse) continue;
@@ -864,7 +864,7 @@ public partial class Solver
                                     score -= GetProjectValue(V, HP, NextLevel);
                                     score += GetProjectValue(V, HP - UseCard.work, NextLevel);
 
-                                   //if (now.PreTarget == k) score = score * 6 / 5;
+                                    //if (now.PreTarget == k) score = score * 6 / 5;
                                     //score += typeFixValue[0] * (1 << now.L);
                                 }
                                 else if (UseCard.type == 1)
