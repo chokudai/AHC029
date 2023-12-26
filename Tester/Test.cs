@@ -166,6 +166,7 @@ class Tester
 
         double[][] data = new double[list.Count][];
 
+        List<(long BestScore, (int n, int m, int k, long score) result)> resultList = new List<(long BestScore, (int n, int m, int k, long score) result)>();
 
         for (int i = 0; i < list.Count; i++)
         {
@@ -173,6 +174,7 @@ class Tester
             Version.Add(item.FileName);
             data[i] = new double[Title.Count - 1];
             int[] countNum = new int[Title.Count - 1];
+
 
             long sumScore = 0;
 
@@ -184,6 +186,11 @@ class Tester
                 countNum[nowP]++;
                 nowP++;
                 sumScore += item.Numbers[j];
+
+                if(i == 0)
+                {
+                    resultList.Add((MaxScore[j], result[j]));
+                }
 
                 for (int n = 0; n < NMUL; n++)
                 {
@@ -238,6 +245,14 @@ class Tester
             //Console.Error.WriteLine(item.FileName + " " + sumScore);
         }
 
+
+        resultList.Sort((a, b) => a.BestScore.CompareTo(b.BestScore));
+
+        foreach (var i in resultList)
+        {
+            double RScore = (double)i.result.score / i.BestScore;
+            Console.WriteLine($"N:{i.result.n} M={i.result.m} K={i.result.k} RScore:{RScore:0.000} Score:{i.BestScore} -> {i.result.score}");
+        }
 
         string htmlFile = $"{FolderName}/summary.html";
 

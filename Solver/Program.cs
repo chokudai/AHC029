@@ -326,7 +326,7 @@ public class State
     {
         //double expectLevelUp = 1000.0 / F.K / Math.Sqrt(F.N * F.M);
         //double expectLevelUp = 700.0 / F.K / Math.Sqrt(F.M) / Math.Pow(F.N, 0.2);
-        double expectLevelUp = 250.0 / F.K / Math.Sqrt(F.M);
+        double expectLevelUp = 220.0 / F.K / Math.Sqrt(F.M);
         //double expectLevelUp = 300.0 / F.K;
         double averageLevelUp;
         if (L <= 3) averageLevelUp = expectLevelUp;
@@ -335,7 +335,7 @@ public class State
         AverageLevel = averageLevelUp;
 
         //fix = 0;
-        fix = 0.6 * ((double)F.K * F.XGuess[4] / F.Xsum - 14.0 / 53);
+        fix = 0.9 * ((double)F.K * F.XGuess[4] / F.Xsum - 14.0 / 53);
         //Console.Error.WriteLine(fix);
 
         /*
@@ -725,14 +725,36 @@ public partial class Solver
             CheckList[i] = new List<double>();
         }
 
-        for (int cn = 0; cn < CheckNum; cn++)
+        bool[] checkIt = new bool[Target];
+        for (int j = 0; j < Target; j++)
         {
+            checkIt[j] = true;
+        }
+
+        for (int cn = 0; cn < CheckNum * 3; cn++)
+        {
+            if(cn == CheckNum)
+            {
+                List<(double Score, int id)> l = new List<(double Score, int id)>();
+                for (int k = 0; k < Target; k++)
+                {
+                    l.Add((PointSum[k], k));
+                }
+                l.Sort((a, b) => -a.Score.CompareTo(b.Score));
+                for (int k = 2; k < Target; k++)
+                {
+                    checkIt[l[k].id] = false;
+                }
+            }
+
+
             (Card c, int cost)[][] pcs = MakeCL(F.XGuess, F.Xsum, CheckTurn);
 
             List<PreProject> lpp = new List<PreProject>();
 
             for (int tar = 0; tar < Target; tar++)
             {
+                if (!checkIt[tar]) continue;
                 State now = new State(ls[tar].S);
                 int start = now.UsedProject;
 
@@ -879,13 +901,9 @@ public partial class Solver
                     */
 
                 }
-                //PointSum[tar] += Math.Log(Eval(now));
                 double addscore = Math.Log(Math.Max(10, Eval(now)));
-                CheckList[tar].Add(addscore);
+                //CheckList[tar].Add(addscore);
                 PointSum[tar] += addscore;
-                //PointSum[tar] += Math.Log(Math.Max(1e-300, Eval(now)));
-                //PointSum[tar] += Math.Log(Math.Max(10, Eval(now)));
-                //PointSum[tar] += Math.Max(0, Eval(now));
             }
         }
 
