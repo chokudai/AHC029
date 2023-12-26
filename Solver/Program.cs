@@ -39,7 +39,7 @@ public class Field
         this.K = K;
         this.T = T;
 
-        XGuess = new int[] { 21, 11, 11, 6, 3 };
+        XGuess = new int[] { 21, 11, 11, 6, 4 };
         Xsum = XGuess.Sum();
     }
 
