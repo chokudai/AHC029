@@ -844,7 +844,10 @@ public partial class Solver
                                     {
                                         if (ALLS.money < (200L << ALLS.L))
                                         {
-                                            tmp = UseCard.work + V * Math.Pow(UseCard.work / (double)hp, 1.4) * 0.93;
+
+                                            double dd = UseCard.work / (double)hp;
+
+                                            tmp = UseCard.work + V * dd * Math.Sqrt(dd) * 0.93;
                                         }
                                         else
                                         {
@@ -1226,7 +1229,6 @@ public partial class Solver
                 }
             }
         }
-        return dec;
 
         if (allNokori > 0) dm += allNokori;
 
@@ -1234,6 +1236,7 @@ public partial class Solver
         {
             need += target - dm;
         }
+        return dec;// + (long)(need * need / target);
 
         if (need == 0) return dec;
         //return dec;
